@@ -1,0 +1,31 @@
+## our broadest claim type
+interface EthDen24Attendance
+  @createModel(description: "An interface to query EthDenver 2024 attendance") {
+  controller: DID! @documentAccount
+  recipient: String! @string(minLength: 42, maxLength: 42)
+  latitude: Float
+  longitude: Float
+  timestamp: DateTime!
+  jwt: String! @string(maxLength: 100000)
+}
+
+type EthDen24DePin implements EthDen24Attendance
+  @createModel(accountRelation: SINGLE, description: "A depin attendance") {
+  controller: DID! @documentAccount
+  recipient: String! @string(minLength: 42, maxLength: 42)
+  latitude: Float
+  longitude: Float
+  timestamp: DateTime!
+  jwt: String! @string(maxLength: 100000)
+}
+
+type EthDen24RepCon implements EthDen24Attendance
+  @createModel(accountRelation: SINGLE, description: "A RepConnect attendance") {
+  controller: DID! @documentAccount
+  recipient: String! @string(minLength: 42, maxLength: 42)
+  latitude: Float
+  longitude: Float
+  timestamp: DateTime!
+  jwt: String! @string(maxLength: 100000)
+}
+

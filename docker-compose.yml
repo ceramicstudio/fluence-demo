@@ -1,0 +1,71 @@
+version: '3.1'
+services:
+  postgres:
+    image: postgres:14-alpine
+    container_name: postgresql
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=admin
+      - POSTGRES_DB=demodb
+    ports:
+      - '5432:5432'
+    volumes: 
+      - db:/var/lib/postgresql/data
+volumes:
+  db:
+    driver: local
+
+    # docker exec -it postgresql psql -d postgres -U admin
+    # \dt*.*
+    # SELECT * FROM information_schema.tables;
+    # SELECT COUNT(stream_id) FROM kjzl6hvfrbw6c967typhcx813d0jdomlt2tv762n6ffp22l6u9xf0gar2yrtwbu;
+    # CREATE EXTENSION hll;
+
+    # SELECT * FROM kjzl6hvfrbw6c967typhcx813d0jdomlt2tv762n6ffp22l6u9xf0gar2yrtwbu WHERE stream_content @>'{"page": "PRODUCTS"}';
+# SELECT stream_content->>'time' FROM kjzl6hvfrbw6c967typhcx813d0jdomlt2tv762n6ffp22l6u9xf0gar2yrtwbu;
+# ALTER TABLE kjzl6hvfrbw6c967typhcx813d0jdomlt2tv762n6ffp22l6u9xf0gar2yrtwbu ADD COLUMN id SERIAL;
+# SELECT TO_TIMESTAMP(stream_content->>'time', 'YYYY-MM-DD"T"HH24:MI:SS"Z"')::timestamp without time zone at time zone 'Etc/UTC' FROM kjzl6hvfrbw6c967typhcx813d0jdomlt2tv762n6ffp22l6u9xf0gar2yrtwbu;
+
+# CREATE TABLE pageview_hourly_rollup (
+#         hour timestamp,
+#         visitor int,
+#         stream_content hll,
+#         unique (hour, visitor)
+# );
+
+# CREATE TABLE is_used (
+#         code text,
+#         used boolean
+# );
+
+# INSERT INTO pageview_hourly_rollup
+# SELECT
+#     date_trunc('hour', TO_TIMESTAMP(stream_content->>'time', 'YYYY-MM-DD"T"HH24:MI:SS"Z"')::timestamp) AS hour,
+#     CAST(stream_content->>'visitor' AS INTEGER) AS visitor,
+#     hll_add_agg(hll_hash_integer(id))
+#   FROM kjzl6hvfrbw6c967typhcx813d0jdomlt2tv762n6ffp22l6u9xf0gar2yrtwbu 
+#   GROUP BY 1, 2;
+
+# SELECT
+#         hour,
+#   hll_cardinality(hll_union_agg((stream_content))) AS hourly_uniques
+# FROM pageview_hourly_rollup
+# GROUP BY 1
+# ORDER BY 1
+# LIMIT 15;
+
+# SELECT
+# date_trunc('hour', TO_TIMESTAMP(stream_content->>'time', 'YYYY-MM-DD"T"HH24:MI:SS"Z"')::timestamp) AS hour,
+#   COUNT(CAST(stream_content->>'visitor' AS INTEGER)) AS visitor
+# FROM kjzl6hvfrbw6c967typhcx813d0jdomlt2tv762n6ffp22l6u9xf0gar2yrtwbu
+# GROUP BY 1
+# ORDER BY 1
+# LIMIT 15;
+
+# INSERT INTO pageview_rollup
+#             SELECT
+#                 date_trunc('hour', TO_TIMESTAMP(stream_content->>'time', 'YYYY-MM-DD"T"HH24:MI:SS"Z"')::timestamp) AS hour,
+#                 CAST(stream_content->>'visitor' AS INTEGER) AS visitor,
+#                 hll_add_agg(hll_hash_integer(CAST(stream_content->>'visitor' AS INTEGER)))
+#             FROM kjzl6hvfrbw6c967typhcx813d0jdomlt2tv762n6ffp22l6u9xf0gar2yrtwbu 
+#             GROUP BY 1, 2;
