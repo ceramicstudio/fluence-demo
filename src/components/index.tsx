@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useAccount } from "wagmi";
+import { useAccount, useChainId } from "wagmi";
 import { useComposeDB } from "@/fragments";
 import { DNA } from "react-loader-spinner";
 import { DID, DagJWS } from "dids";
@@ -19,23 +19,41 @@ interface Event {
   jwt: string;
 }
 
-type RepConnect = Event;
-type DePin = Event;
+type OpenDataDay = Event;
+type FluenceBooth = Event;
+type DePinDay = Event;
+type DeSciDay = Event;
+type TalentDaoHackerHouse = Event;
+type ProofOfData = Event;
 
 export default function Attest() {
   const [attesting, setAttesting] = useState(false);
   const [share, setShare] = useState(false);
   const { compose } = useComposeDB();
-  const [event, setEvent] = useState<"RepConnect" | "DePin" | "">("");
+  const [event, setEvent] = useState<
+    | "OpenDataDay"
+    | "FluenceBooth"
+    | "DePinDay"
+    | "DeSciDay"
+    | "TalentDaoHackerHouse"
+    | "ProofOfData"
+  >();
   const [code, setCode] = useState<string | undefined>(undefined);
-  const [repBadge, setRepBadge] = useState<RepConnect | null>(null);
-  const [dePinBadge, setDePinBadge] = useState<DePin | null>(null);
+  const [openDataBadge, setOpenDataBadge] = useState<OpenDataDay | null>(null);
+  const [fluenceBadge, setFluenceBadge] = useState<FluenceBooth | null>(null);
+  const [dePinBadge, setDePinBadge] = useState<DePinDay | null>(null);
+  const [deSciBadge, setDeSciBadge] = useState<DeSciDay | null>(null);
+  const [talentBadge, setTalentBadge] = useState<TalentDaoHackerHouse | null>(
+    null,
+  );
+  const [proofBadge, setProofBadge] = useState<ProofOfData | null>(null);
   const [userLocation, setUserLocation] = useState<Location>({
     latitude: undefined,
     longitude: undefined,
   });
   const [time, setTime] = useState<Date>();
   const { address } = useAccount();
+  const chainId = useChainId();
 
   const getUserLocation = () => {
     // if geolocation is supported by the users browser
@@ -59,32 +77,50 @@ export default function Attest() {
   };
 
   const getParams = async () => {
-    const queryString = window.location.search;
-    const urlParams = new URLSearchParams(queryString);
-    const eventItem = urlParams.get("event")?.split("?")[0];
-    const code = urlParams.get("event")?.split("?")[1]?.replace("code=", "");
-    console.log(code);
-    setCode(code);
-    console.log(eventItem);
+    // const queryString = window.location.search;
+    // const urlParams = new URLSearchParams(queryString);
+    // const eventItem = urlParams.get("event")?.split("?")[0];
+    // const code = urlParams.get("event")?.split("?")[1]?.replace("code=", "");
+    // console.log(code);
+    const eventItem = localStorage.getItem("event");
+    const code = localStorage.getItem("code");
+    if (code) {
+      setCode(code);
+    }
     eventItem ===
-    "kjzl6hvfrbw6cay52x58x67ksgivtchsj8htrp9vv4lmi92qrnxzukevxoioc6u"
-      ? setEvent("RepConnect")
+    "kjzl6hvfrbw6ca1mo91fjq8b6lnaiaxcken0m2u1u0mcyzuqjoqtnsuwx7pvpcn"
+      ? setEvent("OpenDataDay")
       : eventItem ===
-          "kjzl6hvfrbw6c5xgsds5nt4hc3ko925rp7j8s9m361vuiw8jc27yo0p5wdb29sz"
-        ? setEvent("DePin")
-        : null;
+          "kjzl6hvfrbw6caoti0p0qqwno5g4c2smre0yt80qd7yw6lo7e8oakpnvayasar6"
+        ? setEvent("FluenceBooth")
+        : eventItem ===
+            "kjzl6hvfrbw6c5s0zpztma60fy644djyq4t0geqcccx2fmvknz4kawekqbl1cbu"
+          ? setEvent("DePinDay")
+          : eventItem ===
+              "kjzl6hvfrbw6ca5gzh227gpie4d4onygn5nq07pl2ujin6jcl3l11h7mmwegmvo"
+            ? setEvent("DeSciDay")
+            : eventItem ===
+                "kjzl6hvfrbw6c8do6890w3noosqnbm1iegxe56rwj7mnptandeewvftm65smfqe"
+              ? setEvent("TalentDaoHackerHouse")
+              : eventItem ===
+                  "kjzl6hvfrbw6c52wdbq2nujtgwizhjkkuuv36t0wlqvd2l8ohgf9e11gfs58qe3"
+                ? setEvent("ProofOfData")
+                : null;
 
-    if (eventItem) {
-      const data = await compose.executeQuery<{
-        node: {
-          ethDen24RepCon: RepConnect | null;
-          ethDen24DePin: DePin | null;
-        };
-      }>(`
+    const data = await compose.executeQuery<{
+      node: {
+        openDataDay: OpenDataDay | null;
+        fluenceBooth: FluenceBooth | null;
+        dePinDay: DePinDay | null;
+        deSciDay: DeSciDay | null;
+        talentDaoHackerHouse: TalentDaoHackerHouse | null;
+        proofOfData: ProofOfData | null;
+      };
+    }>(`
         query {
-          node(id: "${localStorage.getItem("did")}") {
+          node(id: "${`did:pkh:eip155:${chainId}:${address?.toLowerCase()}`}") {
           ... on CeramicAccount {
-                ethDen24RepCon {
+              openDataDay {
                 id
                 recipient
                 latitude
@@ -92,7 +128,39 @@ export default function Attest() {
                 timestamp
                 jwt
                 }
-              ethDen24DePin {
+              fluenceBooth {
+                id
+                recipient
+                latitude
+                longitude
+                timestamp
+                jwt
+              }
+              dePinDay {
+                id
+                recipient
+                latitude
+                longitude
+                timestamp
+                jwt
+              }
+              deSciDay {
+                id
+                recipient
+                latitude
+                longitude
+                timestamp
+                jwt
+              }
+              talentDaoHackerHouse {
+                id
+                recipient
+                latitude
+                longitude
+                timestamp
+                jwt
+              }
+              proofOfData {
                 id
                 recipient
                 latitude
@@ -104,79 +172,51 @@ export default function Attest() {
           }
         }
       `);
-      console.log(data);
-      if (
-        data as {
-          data: {
-            node: {
-              ethDen24RepCon: Event | null;
-              ethDen24DePin: Event | null;
-            };
+    console.log(data);
+    if (
+      data as {
+        data: {
+          node: {
+            openDataDay: Event | null;
+            fluenceBooth: Event | null;
+            dePinDay: Event | null;
+            deSciDay: Event | null;
+            talentDaoHackerHouse: Event | null;
+            proofOfData: Event | null;
           };
-        }
-      ) {
-        console.log("test");
-        const repCon = (
-          data as {
-            data: {
-              node: {
-                ethDen24RepCon: RepConnect | null;
-                ethDen24DePin: DePin | null;
-              };
-            };
-          }
-        ).data.node.ethDen24RepCon;
-        console.log(repCon);
-        const dePin = (
-          data as {
-            data: {
-              node: {
-                ethDen24RepCon: RepConnect | null;
-                ethDen24DePin: DePin | null;
-              };
-            };
-          }
-        ).data.node.ethDen24DePin;
-        if (dePin?.jwt) {
-          try {
-            const json = Buffer.from(dePin.jwt, "base64").toString();
-            const parsed = JSON.parse(json) as { jws: DagJWS };
-            console.log(parsed);
-            const newDid = new DID({ resolver: KeyResolver.getResolver() });
-            const result = await newDid.verifyJWS(parsed.jws);
-            const didFromJwt = result.didResolutionResult.didDocument?.id;
-            console.log("This is the payload: ", didFromJwt);
-            if (
-              didFromJwt ===
-              "did:key:z6MkqusKQfvJm7CPiSRkPsGkdrVhTy8EVcQ65uB5H2wWzMMQ"
-            ) {
-              dePin.verified = true;
+        };
+      }
+    ) {
+      if (data.data) {
+        for (const key in data.data.node) {
+          const event: Event | null =
+            data.data.node[key as keyof typeof data.data.node];
+          if (event !== null) {
+            try {
+              const json = Buffer.from(event.jwt, "base64").toString();
+              const parsed = JSON.parse(json) as { jws: DagJWS };
+              console.log(parsed);
+              const newDid = new DID({ resolver: KeyResolver.getResolver() });
+              const result = await newDid.verifyJWS(parsed.jws);
+              const didFromJwt = result.didResolutionResult.didDocument?.id;
+              console.log("This is the payload: ", didFromJwt);
+              if (
+                didFromJwt ===
+                "did:key:z6MkqusKQfvJm7CPiSRkPsGkdrVhTy8EVcQ65uB5H2wWzMMQ"
+              ) {
+                event.verified = true;
+              }
+            } catch (e) {
+              console.log(e);
             }
-          } catch (e) {
-            console.log(e);
           }
         }
-        if (repCon?.jwt) {
-          try {
-            const json = Buffer.from(repCon.jwt, "base64").toString();
-            const parsed = JSON.parse(json) as { jws: DagJWS };
-            console.log(parsed);
-            const newDid = new DID({ resolver: KeyResolver.getResolver() });
-            const result = await newDid.verifyJWS(parsed.jws);
-            const didFromJwt = result.didResolutionResult.didDocument?.id;
-            console.log("This is the payload: ", didFromJwt);
-            if (
-              didFromJwt ===
-              "did:key:z6MkqusKQfvJm7CPiSRkPsGkdrVhTy8EVcQ65uB5H2wWzMMQ"
-            ) {
-              repCon.verified = true;
-            }
-          } catch (e) {
-            console.log(e);
-          }
-        }
-        setRepBadge(repCon);
-        setDePinBadge(dePin);
+        setOpenDataBadge(data.data.node.openDataDay);
+        setFluenceBadge(data.data.node.fluenceBooth);
+        setDePinBadge(data.data.node.dePinDay);
+        setDeSciBadge(data.data.node.deSciDay);
+        setTalentBadge(data.data.node.talentDaoHackerHouse);
+        setProofBadge(data.data.node.proofOfData);
       }
     }
   };
@@ -218,15 +258,13 @@ export default function Attest() {
       alert(finalClaim.err);
       return;
     }
-    const data =
-      event === "RepConnect" && finalClaim.latitude && finalClaim.longitude
-        ? await compose.executeQuery(`
+    const data = await compose.executeQuery(`
     mutation{
-      createEthDen24RepCon(input: {
+      create${event}(input: {
         content: {
           recipient: "${finalClaim.recipient}"
-          latitude: ${finalClaim.latitude}
-          longitude: ${finalClaim.longitude}
+          latitude: ${finalClaim.latitude ?? 0}
+          longitude: ${finalClaim.longitude ?? 0}
           timestamp: "${finalClaim.timestamp}"
           jwt: "${finalClaim.jwt}"
         }
@@ -242,73 +280,7 @@ export default function Attest() {
         }
       }
     }
-  `)
-        : event === "DePin" && finalClaim.latitude && finalClaim.longitude
-          ? await compose.executeQuery(`
-  mutation{
-    createEthDen24DePin(input: {
-      content: {
-        recipient: "${finalClaim.recipient}"
-        latitude: ${finalClaim.latitude}
-        longitude: ${finalClaim.longitude}
-        timestamp: "${finalClaim.timestamp}"
-        jwt: "${finalClaim.jwt}"
-      }
-    })
-    {
-      document{
-        id
-        recipient
-        latitude
-        longitude
-        timestamp
-        jwt
-      }
-    }
-  }
-`)
-          : event === "RepConnect" && !finalClaim.latitude
-            ? await compose.executeQuery(`
-      mutation{
-        createEthDen24RepCon(input: {
-          content: {
-            recipient: "${finalClaim.recipient}"
-            timestamp: "${finalClaim.timestamp}"
-            jwt: "${finalClaim.jwt}"
-          }
-        })
-        {
-          document{
-            id
-            recipient
-            timestamp
-            jwt
-          }
-        }
-      }
-    `)
-            : event === "DePin" && !finalClaim.latitude
-              ? await compose.executeQuery(`
-     mutation{
-       createEthDen24DePin(input: {
-         content: {
-           recipient: "${finalClaim.recipient}"
-           timestamp: "${finalClaim.timestamp}"
-           jwt: "${finalClaim.jwt}"
-         }
-       })
-       {
-         document{
-           id
-           recipient
-           timestamp
-           jwt
-         }
-       }
-     }
-   `)
-              : null;
-    console.log(data);
+  `);
     setAttesting(false);
     await getParams();
     return data;
@@ -333,7 +305,7 @@ export default function Attest() {
   useEffect(() => {
     void getParams();
     void updateTime();
-  }, [address]);
+  }, [address, chainId]);
 
   return (
     <div className="flex min-h-screen min-w-full flex-col items-center justify-start gap-6 px-4 py-8 sm:py-16 md:py-24">
@@ -416,33 +388,33 @@ export default function Attest() {
           </div>
         </form>
         <div className="flex-auto flex-row flex-wrap items-center justify-center">
-          {repBadge !== null && (
+          {openDataBadge !== null && (
             <div className="mt-4 w-auto max-w-full shrink-0 rounded-md border-2 border-emerald-600">
               <label className="flex px-3 py-2 text-sm font-semibold text-gray-800">
-                RepConnect Badge
+                Open Data Day Badge
               </label>
               <p className="w-full rounded-md border px-3 py-2 focus:border-indigo-600 focus:outline-none">
                 Recipient:{" "}
-                {repBadge?.recipient.slice(0, 6) +
+                {openDataBadge?.recipient.slice(0, 6) +
                   "..." +
-                  repBadge?.recipient.slice(-4)}
+                  openDataBadge?.recipient.slice(-4)}
               </p>
               <p className="w-full rounded-md border px-3 py-2 focus:border-indigo-600 focus:outline-none">
-                Timestamp: {repBadge?.timestamp}
+                Timestamp: {openDataBadge?.timestamp}
               </p>
-              {repBadge.latitude && (
+              {openDataBadge.latitude && (
                 <p className="w-full rounded-md border px-3 py-2 focus:border-indigo-600 focus:outline-none">
-                  Latitude: {repBadge?.latitude}
+                  Latitude: {openDataBadge?.latitude}
                 </p>
               )}
-              {repBadge.longitude && (
+              {openDataBadge.longitude && (
                 <p className="w-full rounded-md border px-3 py-2 focus:border-indigo-600 focus:outline-none">
-                  Longitude: {repBadge?.longitude}
+                  Longitude: {openDataBadge?.longitude}
                 </p>
               )}
-              {repBadge.verified && (
+              {openDataBadge.verified && (
                 <p className="w-full rounded-md border px-3 py-2 focus:border-indigo-600 focus:outline-none">
-                  Verified: {repBadge?.verified ? "true" : "false"}
+                  Verified: {openDataBadge?.verified ? "true" : "false"}
                 </p>
               )}
             </div>
@@ -476,6 +448,130 @@ export default function Attest() {
               {dePinBadge.verified && (
                 <p className="w-full rounded-md border px-3 py-2 focus:border-indigo-600 focus:outline-none">
                   Verified: {dePinBadge?.verified ? "true" : "false"}
+                </p>
+              )}
+            </div>
+          )}
+          {fluenceBadge !== null && (
+            <div className="mt-4 w-auto max-w-full shrink-0 rounded-md border-2 border-emerald-600">
+              <label className="flex px-3 py-2 text-sm font-semibold text-gray-800">
+                Fluence Badge
+              </label>
+              <p className="w-full rounded-md border px-3 py-2 focus:border-indigo-600 focus:outline-none">
+                Recipient:{" "}
+                {fluenceBadge?.recipient.slice(0, 6) +
+                  "..." +
+                  fluenceBadge?.recipient.slice(-4)}
+              </p>
+              <p className="w-full rounded-md border px-3 py-2 focus:border-indigo-600 focus:outline-none">
+                Timestamp: {fluenceBadge?.timestamp}
+              </p>
+              {fluenceBadge.latitude && (
+                <p className="w-full rounded-md border px-3 py-2 focus:border-indigo-600 focus:outline-none">
+                  Latitude: {fluenceBadge?.latitude}
+                </p>
+              )}
+              {fluenceBadge.longitude && (
+                <p className="w-full rounded-md border px-3 py-2 focus:border-indigo-600 focus:outline-none">
+                  Longitude: {fluenceBadge?.longitude}
+                </p>
+              )}
+              {fluenceBadge.verified && (
+                <p className="w-full rounded-md border px-3 py-2 focus:border-indigo-600 focus:outline-none">
+                  Verified: {fluenceBadge?.verified ? "true" : "false"}
+                </p>
+              )}
+            </div>
+          )}
+          {deSciBadge !== null && (
+            <div className="mt-4 w-auto max-w-full shrink-0 rounded-md border-2 border-emerald-600">
+              <label className="flex px-3 py-2 text-sm font-semibold text-gray-800">
+                DeSci Badge
+              </label>
+              <p className="w-full rounded-md border px-3 py-2 focus:border-indigo-600 focus:outline-none">
+                Recipient:{" "}
+                {deSciBadge?.recipient.slice(0, 6) +
+                  "..." +
+                  deSciBadge?.recipient.slice(-4)}
+              </p>
+              <p className="w-full rounded-md border px-3 py-2 focus:border-indigo-600 focus:outline-none">
+                Timestamp: {deSciBadge?.timestamp}
+              </p>
+              {deSciBadge.latitude && (
+                <p className="w-full rounded-md border px-3 py-2 focus:border-indigo-600 focus:outline-none">
+                  Latitude: {deSciBadge?.latitude}
+                </p>
+              )}
+              {deSciBadge.longitude && (
+                <p className="w-full rounded-md border px-3 py-2 focus:border-indigo-600 focus:outline-none">
+                  Longitude: {deSciBadge?.longitude}
+                </p>
+              )}
+              {deSciBadge.verified && (
+                <p className="w-full rounded-md border px-3 py-2 focus:border-indigo-600 focus:outline-none">
+                  Verified: {deSciBadge?.verified ? "true" : "false"}
+                </p>
+              )}
+            </div>
+          )}
+          {talentBadge !== null && (
+            <div className="mt-4 w-auto max-w-full shrink-0 rounded-md border-2 border-emerald-600">
+              <label className="flex px-3 py-2 text-sm font-semibold text-gray-800">
+                TalentDAO Hacker House Badge
+              </label>
+              <p className="w-full rounded-md border px-3 py-2 focus:border-indigo-600 focus:outline-none">
+                Recipient:{" "}
+                {talentBadge?.recipient.slice(0, 6) +
+                  "..." +
+                  talentBadge?.recipient.slice(-4)}
+              </p>
+              <p className="w-full rounded-md border px-3 py-2 focus:border-indigo-600 focus:outline-none">
+                Timestamp: {talentBadge?.timestamp}
+              </p>
+              {talentBadge.latitude && (
+                <p className="w-full rounded-md border px-3 py-2 focus:border-indigo-600 focus:outline-none">
+                  Latitude: {talentBadge?.latitude}
+                </p>
+              )}
+              {talentBadge.longitude && (
+                <p className="w-full rounded-md border px-3 py-2 focus:border-indigo-600 focus:outline-none">
+                  Longitude: {talentBadge?.longitude}
+                </p>
+              )}
+              {talentBadge.verified && (
+                <p className="w-full rounded-md border px-3 py-2 focus:border-indigo-600 focus:outline-none">
+                  Verified: {talentBadge?.verified ? "true" : "false"}
+                </p>
+              )}
+            </div>
+          )}
+          {proofBadge !== null && (
+            <div className="mt-4 w-auto max-w-full shrink-0 rounded-md border-2 border-emerald-600">
+              <label className="flex px-3 py-2 text-sm font-semibold text-gray-800">
+                Proof of Data Badge
+              </label>
+              <p className="w-full rounded-md border px-3 py-2 focus:border-indigo-600 focus:outline-none">
+                Recipient:{" "}
+                {proofBadge?.recipient.slice(0, 6) +
+                  "..." +
+                  proofBadge?.recipient.slice(-4)}
+              </p>
+              <p className="w-full rounded-md border px-3 py-2 focus:border-indigo-600 focus:outline-none">
+                Timestamp: {proofBadge?.timestamp}
+              </p>
+              {proofBadge.latitude && (
+                <p className="w-full rounded-md border px-3 py-2 focus:border-indigo-600 focus:outline-none">
+                  Latitude: {proofBadge?.latitude}
+                </p>
+              )}
+              {proofBadge.longitude && (
+                <p className="w-full rounded-md border px-3 py-2 focus:border-indigo-600 focus:outline-none">
+                  Longitude: {proofBadge?.longitude}
+                </p>
+              )}
+              {proofBadge.verified && (
+                <p className="w-full rounded-md border px-3 py-2 focus:border-indigo-600 focus:outline-none">
+                  Verified: {proofBadge?.verified ? "true" : "false"}
                 </p>
               )}
             </div>

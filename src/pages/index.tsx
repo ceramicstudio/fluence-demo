@@ -1,5 +1,4 @@
 import Head from "next/head";
-import Link from "next/link";
 import { useEffect, useState } from "react";
 import Navbar from "@/components/nav";
 import { useAccount } from "wagmi";
@@ -9,7 +8,19 @@ export default function Home() {
   const { address } = useAccount();
   const [loggedIn, setLoggedIn] = useState(false);
 
+  const getParams = async () => {
+    const queryString = window.location.search;
+    const urlParams = new URLSearchParams(queryString);
+    const eventItem = urlParams.get("event")?.split("?")[0];
+    const code = urlParams.get("event")?.split("?")[1]?.replace("code=", "");
+    if (eventItem && code) {
+      localStorage.setItem("event", eventItem);
+      localStorage.setItem("code", code);
+    }
+  }
+
   useEffect(() => {
+    void getParams();
     if (address) {
       setLoggedIn(true);
     } else {
