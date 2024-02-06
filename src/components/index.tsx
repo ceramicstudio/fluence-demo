@@ -4,11 +4,20 @@ import { useComposeDB } from "@/fragments";
 import { DNA } from "react-loader-spinner";
 import { DID, DagJWS } from "dids";
 import KeyResolver from "key-did-resolver";
+import { set } from "zod";
 
 type Location = {
   latitude: number | undefined;
   longitude: number | undefined;
 };
+
+type EventString =
+  | "OpenDataDay"
+  | "FluenceBooth"
+  | "DePinDay"
+  | "DeSciDay"
+  | "TalentDaoHackerHouse"
+  | "ProofOfData";
 
 interface Event {
   recipient: string;
@@ -17,6 +26,7 @@ interface Event {
   verified?: boolean;
   timestamp: string;
   jwt: string;
+  event: EventString;
 }
 
 type OpenDataDay = Event;
@@ -28,16 +38,10 @@ type ProofOfData = Event;
 
 export default function Attest() {
   const [attesting, setAttesting] = useState(false);
+  const [eligible, setEligible] = useState(false);
   const [share, setShare] = useState(false);
   const { compose } = useComposeDB();
-  const [event, setEvent] = useState<
-    | "OpenDataDay"
-    | "FluenceBooth"
-    | "DePinDay"
-    | "DeSciDay"
-    | "TalentDaoHackerHouse"
-    | "ProofOfData"
-  >();
+  const [event, setEvent] = useState<EventString>();
   const [code, setCode] = useState<string | undefined>(undefined);
   const [openDataBadge, setOpenDataBadge] = useState<OpenDataDay | null>(null);
   const [fluenceBadge, setFluenceBadge] = useState<FluenceBooth | null>(null);
@@ -76,147 +80,145 @@ export default function Attest() {
     }
   };
 
-  const getParams = async () => {
-    // const queryString = window.location.search;
-    // const urlParams = new URLSearchParams(queryString);
-    // const eventItem = urlParams.get("event")?.split("?")[0];
-    // const code = urlParams.get("event")?.split("?")[1]?.replace("code=", "");
-    // console.log(code);
-    const eventItem = localStorage.getItem("event");
-    const code = localStorage.getItem("code");
-    if (code) {
-      setCode(code);
-    }
-    eventItem ===
-    "kjzl6hvfrbw6ca1mo91fjq8b6lnaiaxcken0m2u1u0mcyzuqjoqtnsuwx7pvpcn"
-      ? setEvent("OpenDataDay")
-      : eventItem ===
-          "kjzl6hvfrbw6caoti0p0qqwno5g4c2smre0yt80qd7yw6lo7e8oakpnvayasar6"
-        ? setEvent("FluenceBooth")
-        : eventItem ===
-            "kjzl6hvfrbw6c5s0zpztma60fy644djyq4t0geqcccx2fmvknz4kawekqbl1cbu"
-          ? setEvent("DePinDay")
-          : eventItem ===
-              "kjzl6hvfrbw6ca5gzh227gpie4d4onygn5nq07pl2ujin6jcl3l11h7mmwegmvo"
-            ? setEvent("DeSciDay")
-            : eventItem ===
-                "kjzl6hvfrbw6c8do6890w3noosqnbm1iegxe56rwj7mnptandeewvftm65smfqe"
-              ? setEvent("TalentDaoHackerHouse")
-              : eventItem ===
-                  "kjzl6hvfrbw6c52wdbq2nujtgwizhjkkuuv36t0wlqvd2l8ohgf9e11gfs58qe3"
-                ? setEvent("ProofOfData")
-                : null;
-
+  const createEligibility = async (e: string) => {
     const data = await compose.executeQuery<{
       node: {
-        openDataDay: OpenDataDay | null;
-        fluenceBooth: FluenceBooth | null;
-        dePinDay: DePinDay | null;
-        deSciDay: DeSciDay | null;
-        talentDaoHackerHouse: TalentDaoHackerHouse | null;
-        proofOfData: ProofOfData | null;
+        ethDenverAttendanceList: {
+          edges: {
+            node: Event;
+          }[];
+        };
       };
     }>(`
         query {
           node(id: "${`did:pkh:eip155:${chainId}:${address?.toLowerCase()}`}") {
           ... on CeramicAccount {
-              openDataDay {
-                id
-                recipient
-                latitude
-                longitude
-                timestamp
-                jwt
+             ethDenverAttendanceList(filters: { where: { event: { equalTo: "${e}" } } }, first: 1) {
+              edges {
+                node {
+                  id
+                  recipient
+                  latitude
+                  longitude
+                  timestamp
+                  jwt
+                  event
                 }
-              fluenceBooth {
-                id
-                recipient
-                latitude
-                longitude
-                timestamp
-                jwt
               }
-              dePinDay {
-                id
-                recipient
-                latitude
-                longitude
-                timestamp
-                jwt
-              }
-              deSciDay {
-                id
-                recipient
-                latitude
-                longitude
-                timestamp
-                jwt
-              }
-              talentDaoHackerHouse {
-                id
-                recipient
-                latitude
-                longitude
-                timestamp
-                jwt
-              }
-              proofOfData {
-                id
-                recipient
-                latitude
-                longitude
-                timestamp
-                jwt
+             }
+            }
+          }
+        }
+      `);
+    if (
+      data.data &&
+      data.data.node.ethDenverAttendanceList.edges.length === 0
+    ) {
+      setEligible(true);
+    }
+  };
+
+  const findEvent = async () => {
+    const code = localStorage.getItem("code");
+    if (!code) {
+      alert("No unique code provided");
+      return;
+    }
+    setCode(code);
+    const result = await fetch("/api/find", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        code,
+      }),
+    });
+    const data = (await result.json()) as EventString | { err: string };
+    console.log(data);
+    if (typeof data === "string") {
+      setEvent(data);
+      await createEligibility(data);
+    }
+    await getRecords();
+    
+  };
+
+  const getRecords = async () => {
+    const data = await compose.executeQuery<{
+      node: {
+        ethDenverAttendanceList: {
+          edges: {
+            node: Event;
+          }[];
+        };
+      };
+    }>(`
+        query {
+          node(id: "${`did:pkh:eip155:${chainId}:${address?.toLowerCase()}`}") {
+          ... on CeramicAccount {
+             ethDenverAttendanceList(first: 20) {
+                edges {
+                  node {
+                    id
+                    recipient
+                    latitude
+                    longitude
+                    timestamp
+                    jwt
+                    event
+                  }
+                }
               }
             }
           }
         }
       `);
     console.log(data);
+
     if (
-      data as {
-        data: {
-          node: {
-            openDataDay: Event | null;
-            fluenceBooth: Event | null;
-            dePinDay: Event | null;
-            deSciDay: Event | null;
-            talentDaoHackerHouse: Event | null;
-            proofOfData: Event | null;
-          };
-        };
-      }
+      data.data &&
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
+      (data.data as any).node.ethDenverAttendanceList.edges.length
     ) {
-      if (data.data) {
-        for (const key in data.data.node) {
-          const event: Event | null =
-            data.data.node[key as keyof typeof data.data.node];
-          if (event !== null) {
-            try {
-              const json = Buffer.from(event.jwt, "base64").toString();
-              const parsed = JSON.parse(json) as { jws: DagJWS };
-              console.log(parsed);
-              const newDid = new DID({ resolver: KeyResolver.getResolver() });
-              const result = await newDid.verifyJWS(parsed.jws);
-              const didFromJwt = result.didResolutionResult.didDocument?.id;
-              console.log("This is the payload: ", didFromJwt);
-              if (
-                didFromJwt ===
-                "did:key:z6MkqusKQfvJm7CPiSRkPsGkdrVhTy8EVcQ65uB5H2wWzMMQ"
-              ) {
-                event.verified = true;
-              }
-            } catch (e) {
-              console.log(e);
-            }
+      for (const el of data.data.node.ethDenverAttendanceList.edges) {
+        const event = el.node;
+        try {
+          const json = Buffer.from(event.jwt, "base64").toString();
+          const parsed = JSON.parse(json) as { jws: DagJWS };
+          console.log(parsed);
+          const newDid = new DID({ resolver: KeyResolver.getResolver() });
+          const result = await newDid.verifyJWS(parsed.jws);
+          const didFromJwt = result.didResolutionResult.didDocument?.id;
+          console.log("This is the payload: ", didFromJwt);
+          if (event.latitude === 0) {
+            event.latitude = undefined;
           }
+          if (event.longitude === 0) {
+            event.longitude = undefined;
+          }
+          if (
+            didFromJwt ===
+            "did:key:z6MkqusKQfvJm7CPiSRkPsGkdrVhTy8EVcQ65uB5H2wWzMMQ"
+          ) {
+            event.verified = true;
+            event.event === "OpenDataDay"
+              ? setOpenDataBadge(event)
+              : event.event === "FluenceBooth"
+                ? setFluenceBadge(event)
+                : event.event === "DePinDay"
+                  ? setDePinBadge(event)
+                  : event.event === "DeSciDay"
+                    ? setDeSciBadge(event)
+                    : event.event === "TalentDaoHackerHouse"
+                      ? setTalentBadge(event)
+                      : event.event === "ProofOfData"
+                        ? setProofBadge(event)
+                        : null;
+          }
+        } catch (e) {
+          console.log(e);
         }
-        setOpenDataBadge(data.data.node.openDataDay);
-        setFluenceBadge(data.data.node.fluenceBooth);
-        setDePinBadge(data.data.node.dePinDay);
-        setDeSciBadge(data.data.node.deSciDay);
-        setTalentBadge(data.data.node.talentDaoHackerHouse);
-        setProofBadge(data.data.node.proofOfData);
       }
     }
   };
@@ -260,13 +262,14 @@ export default function Attest() {
     }
     const data = await compose.executeQuery(`
     mutation{
-      create${event}(input: {
+      createEthDenverAttendance(input: {
         content: {
           recipient: "${finalClaim.recipient}"
           latitude: ${finalClaim.latitude ?? 0}
           longitude: ${finalClaim.longitude ?? 0}
           timestamp: "${finalClaim.timestamp}"
           jwt: "${finalClaim.jwt}"
+          event: "${event}"
         }
       })
       {
@@ -277,12 +280,14 @@ export default function Attest() {
           longitude
           timestamp
           jwt
+          event
         }
       }
     }
   `);
     setAttesting(false);
-    await getParams();
+    await getRecords();
+    setEligible(false);
     return data;
   };
 
@@ -291,7 +296,7 @@ export default function Attest() {
     console.log(finalClaim);
   };
 
-  const updateTime = async () => {
+  const updateTime = () => {
     //update time every second
     try {
       setInterval(() => {
@@ -303,7 +308,7 @@ export default function Attest() {
   };
 
   useEffect(() => {
-    void getParams();
+    void findEvent();
     void updateTime();
   }, [address, chainId]);
 
@@ -364,13 +369,13 @@ export default function Attest() {
               {time?.toLocaleString()}
             </p>
           </div>
-          <div className="mt-6 flex justify-center">
+          {eligible && <div className="mt-6 flex justify-center">
             {!attesting ? (
               <button
                 className="w-1/2 transform rounded-md bg-indigo-700 px-4 py-2 text-sm text-white transition-colors duration-200 hover:bg-indigo-600 focus:bg-indigo-600 focus:outline-none"
-                onClick={async (e) => {
+                onClick={(e) => {
                   e.preventDefault();
-                  await createClaim();
+                  void createClaim();
                 }}
               >
                 {"Generate Badge"}
@@ -385,7 +390,7 @@ export default function Attest() {
                 wrapperClass="dna-wrapper"
               />
             )}
-          </div>
+          </div>}
         </form>
         <div className="flex-auto flex-row flex-wrap items-center justify-center">
           {openDataBadge !== null && (

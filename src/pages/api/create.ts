@@ -52,6 +52,7 @@ export default async function createCredential(
           err: "Code already used",
         });
       } else {
+        const event = (checkIfUsed.rows[0] as { event: string }).event;
         const key = fromString(SECRET_KEY, "base16");
         const provider = new Ed25519Provider(key);
         const staticDid = new DID({

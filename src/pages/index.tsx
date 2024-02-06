@@ -11,13 +11,11 @@ export default function Home() {
   const getParams = async () => {
     const queryString = window.location.search;
     const urlParams = new URLSearchParams(queryString);
-    const eventItem = urlParams.get("event")?.split("?")[0];
-    const code = urlParams.get("event")?.split("?")[1]?.replace("code=", "");
-    if (eventItem && code) {
-      localStorage.setItem("event", eventItem);
+    const code = urlParams.get("code")?.split("?")[0];
+    if (code) {
       localStorage.setItem("code", code);
     }
-  }
+  };
 
   useEffect(() => {
     void getParams();
@@ -37,21 +35,20 @@ export default function Home() {
       </Head>
       <Navbar />
 
-        <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50 dark:bg-gray-900">
-          {loggedIn && (
-            <h1 className="text-lg font-extrabold tracking-tight text-white sm:text-2xl md:text-5xl text-center mt-6">
-              Connected with{" "}
-              <span className="text-[hsl(280,100%,70%)]">
-                {" "}
-                {address?.slice(0, 6)}...{address?.slice(-4)}
-              </span>
-            </h1>
-          )}
-          <div className="flex flex-col items-center justify-start min-w-full min-h-screen">
-            {loggedIn && <Attest />}
-          </div>
+      <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50 dark:bg-gray-900">
+        {loggedIn && (
+          <h1 className="mt-6 text-center text-lg font-extrabold tracking-tight text-white sm:text-2xl md:text-5xl">
+            Connected with{" "}
+            <span className="text-[hsl(280,100%,70%)]">
+              {" "}
+              {address?.slice(0, 6)}...{address?.slice(-4)}
+            </span>
+          </h1>
+        )}
+        <div className="flex min-h-screen min-w-full flex-col items-center justify-start">
+          {loggedIn && <Attest />}
         </div>
-   
+      </div>
     </>
   );
 }

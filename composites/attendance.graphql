@@ -1,68 +1,16 @@
-## our broadest claim type
-interface EthDen24Attendance
-  @createModel(description: "An interface to query EthDenver 2024 attendance") {
+type EthDenverAttendance
+  @createModel(
+    accountRelation: LIST
+    description: "An attendance claim at an EthDenver event"
+  )
+  @createIndex(fields: [{ path: ["recipient"] }])
+  @createIndex(fields: [{ path: ["event"] }])
+  @createIndex(fields: [{ path: ["latitude"] }])
+  @createIndex(fields: [{ path: ["longitude"] }])
+  @createIndex(fields: [{ path: ["timestamp"] }]) {
   controller: DID! @documentAccount
   recipient: String! @string(minLength: 42, maxLength: 42)
-  latitude: Float
-  longitude: Float
-  timestamp: DateTime!
-  jwt: String! @string(maxLength: 100000)
-}
-
-type FluenceBooth implements EthDen24Attendance
-  @createModel(accountRelation: SINGLE, description: "A fluence booth check-in") {
-  controller: DID! @documentAccount
-  recipient: String! @string(minLength: 42, maxLength: 42)
-  latitude: Float
-  longitude: Float
-  timestamp: DateTime!
-  jwt: String! @string(maxLength: 100000)
-}
-
-type ProofOfData implements EthDen24Attendance
-  @createModel(accountRelation: SINGLE, description: "A Proof-of-Data attendance") {
-  controller: DID! @documentAccount
-  recipient: String! @string(minLength: 42, maxLength: 42)
-  latitude: Float
-  longitude: Float
-  timestamp: DateTime!
-  jwt: String! @string(maxLength: 100000)
-}
-
-type DePinDay implements EthDen24Attendance
-  @createModel(accountRelation: SINGLE, description: "A DePin Day attendance") {
-  controller: DID! @documentAccount
-  recipient: String! @string(minLength: 42, maxLength: 42)
-  latitude: Float
-  longitude: Float
-  timestamp: DateTime!
-  jwt: String! @string(maxLength: 100000)
-}
-
-type DeSciDay implements EthDen24Attendance
-  @createModel(accountRelation: SINGLE, description: "A DeSci Day attendance") {
-  controller: DID! @documentAccount
-  recipient: String! @string(minLength: 42, maxLength: 42)
-  latitude: Float
-  longitude: Float
-  timestamp: DateTime!
-  jwt: String! @string(maxLength: 100000)
-}
-
-type OpenDataDay implements EthDen24Attendance
-  @createModel(accountRelation: SINGLE, description: "An Open Data Day attendance") {
-  controller: DID! @documentAccount
-  recipient: String! @string(minLength: 42, maxLength: 42)
-  latitude: Float
-  longitude: Float
-  timestamp: DateTime!
-  jwt: String! @string(maxLength: 100000)
-}
-
-type TalentDAOHackerHouse implements EthDen24Attendance
-  @createModel(accountRelation: SINGLE, description: "A TalentDAO Hacker House attendance") {
-  controller: DID! @documentAccount
-  recipient: String! @string(minLength: 42, maxLength: 42)
+  event: String! @string(maxLength: 100)
   latitude: Float
   longitude: Float
   timestamp: DateTime!

@@ -11,7 +11,8 @@ export default async function updatePg(
 //   const createTableString = `
 //   CREATE TABLE is_used (
 //     code text,
-//     used boolean
+//     used boolean,
+//     event text,
 // );`
 // const newItemString = `INSERT INTO is_used (code, used) VALUES ('${code}', ${used})`;
 
@@ -41,7 +42,7 @@ export default async function updatePg(
     await client.connect();
     // const checkIfUsed = await client.query(`SELECT * FROM is_used WHERE code='${'c8292c'}'`);
     const updateUsedStatus = await client.query(
-      `UPDATE is_used SET used=false WHERE code='${'c8292c'}'`,
+      `UPDATE is_used SET used=false WHERE code='${'eaae97'}'`,
     );
     console.log(updateUsedStatus);
     await client.end();
