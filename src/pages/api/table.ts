@@ -44,7 +44,7 @@ export default async function updatePg(
               ? (e = "DeSciDay")
               : i < 5000
                 ? (e = "OpenDataDay")
-                : (e = "TalentDAOHackerHouse");
+                : (e = "TalentDaoHackerHouse");
       // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
       const newItemString = `INSERT INTO is_used (code, used, event) VALUES ('${code}', false, '${e}')`;
       await client.query(newItemString);

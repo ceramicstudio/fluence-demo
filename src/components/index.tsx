@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import { useAccount, useChainId } from "wagmi";
 import { useComposeDB } from "@/fragments";
 import { DNA } from "react-loader-spinner";
@@ -27,6 +28,7 @@ interface Event {
   timestamp: string;
   jwt: string;
   event: EventString;
+  id: string;
 }
 
 type OpenDataDay = Event;
@@ -141,7 +143,6 @@ export default function Attest() {
       await createEligibility(data);
     }
     await getRecords();
-    
   };
 
   const getRecords = async () => {
@@ -216,6 +217,7 @@ export default function Attest() {
                         ? setProofBadge(event)
                         : null;
           }
+          console.log(talentBadge)
         } catch (e) {
           console.log(e);
         }
@@ -315,270 +317,210 @@ export default function Attest() {
   return (
     <div className="flex min-h-screen min-w-full flex-col items-center justify-start gap-6 px-4 py-8 sm:py-16 md:py-24">
       <div
-        className="w-full rounded-md bg-white p-6 shadow-xl shadow-rose-600/40 ring-2 ring-indigo-600"
+        className="w-3/4 rounded-md bg-white p-6 shadow-xl shadow-rose-600/40 ring-2 ring-indigo-600"
         style={{ height: "fit-content", minHeight: "35rem" }}
       >
         <form className="mt-4" key={1}>
-          <div className="mb-4">
-            <label className="block text-sm font-semibold text-gray-800">
-              Event
-            </label>
-            <p className="h-8 w-full rounded-md border px-3 py-2 focus:border-indigo-600 focus:outline-none">
-              {event ? event : ""}{" "}
-            </p>
-          </div>
-          <div className="mb-4">
-            <label className="block text-sm font-semibold text-gray-800">
-              Coordinates You&apos;ve Shared{" "}
-              <span className="font-light">(optional)</span>
-            </label>
-            {share && (
-              <p className="mb-3 text-xs font-light text-gray-800">
-                {userLocation
-                  ? `${userLocation.latitude}, ${userLocation.longitude}`
-                  : ""}
-              </p>
-            )}
-            <div className="flex items-center">
-              <input
-                id="link-checkbox"
-                type="checkbox"
-                value=""
-                onChange={() => {
-                  setShare(!share);
-                  getUserLocation();
-                }}
-                className="h-4 w-4 rounded border-gray-300 bg-gray-100 text-blue-600 focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:ring-offset-gray-800 dark:focus:ring-blue-600"
-              ></input>
-              {!share ? (
-                <label className="font-small ms-2 text-sm text-gray-900 dark:text-gray-300">
-                  I agree to share my location
+          {eligible && (
+            <>
+              <div className="mb-4">
+                <label className="block text-sm font-semibold text-gray-800">
+                  Event
                 </label>
-              ) : (
-                <label className="font-small ms-2 text-sm text-gray-900 dark:text-gray-300">
-                  Unshare
+                <p className="h-8 w-full rounded-md border px-3 py-2 focus:border-indigo-600 focus:outline-none">
+                  {event ? event : ""}{" "}
+                </p>
+              </div>
+              <div className="mb-4">
+                <label className="block text-sm font-semibold text-gray-800">
+                  Coordinates You&apos;ve Shared{" "}
+                  <span className="font-light">(optional)</span>
                 </label>
-              )}
-            </div>
-          </div>
-          <div className="mb-4">
-            <label className="block text-sm font-semibold text-gray-800">
-              Current time
-            </label>
-            <p className="text-xs font-light text-gray-800">
-              {time?.toLocaleString()}
-            </p>
-          </div>
-          {eligible && <div className="mt-6 flex justify-center">
-            {!attesting ? (
-              <button
-                className="w-1/2 transform rounded-md bg-indigo-700 px-4 py-2 text-sm text-white transition-colors duration-200 hover:bg-indigo-600 focus:bg-indigo-600 focus:outline-none"
-                onClick={(e) => {
-                  e.preventDefault();
-                  void createClaim();
-                }}
-              >
-                {"Generate Badge"}
-              </button>
-            ) : (
-              <DNA
-                visible={true}
-                height="80"
-                width="80"
-                ariaLabel="dna-loading"
-                wrapperStyle={{}}
-                wrapperClass="dna-wrapper"
-              />
-            )}
-          </div>}
+                {share && (
+                  <p className="mb-3 text-xs font-light text-gray-800">
+                    {userLocation
+                      ? `${userLocation.latitude}, ${userLocation.longitude}`
+                      : ""}
+                  </p>
+                )}
+                <div className="flex items-center">
+                  <input
+                    id="link-checkbox"
+                    type="checkbox"
+                    value=""
+                    onChange={() => {
+                      setShare(!share);
+                      getUserLocation();
+                    }}
+                    className="h-4 w-4 rounded border-gray-300 bg-gray-100 text-blue-600 focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:ring-offset-gray-800 dark:focus:ring-blue-600"
+                  ></input>
+                  {!share ? (
+                    <label className="font-small ms-2 text-sm text-gray-900 dark:text-gray-300">
+                      I agree to share my location
+                    </label>
+                  ) : (
+                    <label className="font-small ms-2 text-sm text-gray-900 dark:text-gray-300">
+                      Unshare
+                    </label>
+                  )}
+                </div>
+              </div>
+              <div className="mb-4">
+                <label className="block text-sm font-semibold text-gray-800">
+                  Current time
+                </label>
+                <p className="text-xs font-light text-gray-800">
+                  {time?.toLocaleString()}
+                </p>
+              </div>
+
+              <div className="mt-6 flex justify-center">
+                {!attesting ? (
+                  <button
+                    className="w-1/2 transform rounded-md bg-indigo-700 px-4 py-2 text-sm text-white transition-colors duration-200 hover:bg-indigo-600 focus:bg-indigo-600 focus:outline-none"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      void createClaim();
+                    }}
+                  >
+                    {"Generate Badge"}
+                  </button>
+                ) : (
+                  <DNA
+                    visible={true}
+                    height="80"
+                    width="80"
+                    ariaLabel="dna-loading"
+                    wrapperStyle={{}}
+                    wrapperClass="dna-wrapper"
+                  />
+                )}
+              </div>
+            </>
+          )}
         </form>
+        <h2 className="mb-8 mt-6 text-center text-3xl font-semibold text-gray-800">
+          Your Badges: 
+        </h2>
         <div className="flex-auto flex-row flex-wrap items-center justify-center">
           {openDataBadge !== null && (
-            <div className="mt-4 w-auto max-w-full shrink-0 rounded-md border-2 border-emerald-600">
-              <label className="flex px-3 py-2 text-sm font-semibold text-gray-800">
+            <div className="mt-4 w-auto max-w-full shrink-0">
+              <p className="m-auto text-center font-semibold text-gray-800">
                 Open Data Day Badge
-              </label>
-              <p className="w-full rounded-md border px-3 py-2 focus:border-indigo-600 focus:outline-none">
-                Recipient:{" "}
-                {openDataBadge?.recipient.slice(0, 6) +
-                  "..." +
-                  openDataBadge?.recipient.slice(-4)}
               </p>
-              <p className="w-full rounded-md border px-3 py-2 focus:border-indigo-600 focus:outline-none">
-                Timestamp: {openDataBadge?.timestamp}
-              </p>
-              {openDataBadge.latitude && (
-                <p className="w-full rounded-md border px-3 py-2 focus:border-indigo-600 focus:outline-none">
-                  Latitude: {openDataBadge?.latitude}
-                </p>
-              )}
-              {openDataBadge.longitude && (
-                <p className="w-full rounded-md border px-3 py-2 focus:border-indigo-600 focus:outline-none">
-                  Longitude: {openDataBadge?.longitude}
-                </p>
-              )}
-              {openDataBadge.verified && (
-                <p className="w-full rounded-md border px-3 py-2 focus:border-indigo-600 focus:outline-none">
-                  Verified: {openDataBadge?.verified ? "true" : "false"}
-                </p>
-              )}
+              <Image
+                src="/opendata.png"
+                alt="Open Data Day Badge"
+                width={400}
+                height={400}
+                style={{ margin: "auto" }}
+                onClick={() => {
+                  window.open(
+                    `https://cerscan.com/mainnet/stream/${openDataBadge.id}`,
+                    "_blank",
+                  );
+                }}
+              />
             </div>
           )}
           {dePinBadge !== null && (
-            <div className="mt-4 w-auto max-w-full shrink-0 rounded-md border-2 border-emerald-600">
-              <label className="flex px-3 py-2 text-sm font-semibold text-gray-800">
+            <div className="mt-4 w-auto max-w-full shrink-0">
+              <p className="m-auto text-center font-semibold text-gray-800">
                 DePin Badge
-              </label>
-              <p className="rounded-md border px-3 py-2 focus:border-indigo-600 focus:outline-none">
-                Recipient:{" "}
-                {dePinBadge?.recipient
-                  ? dePinBadge?.recipient.slice(0, 6) +
-                    "..." +
-                    dePinBadge?.recipient.slice(-4)
-                  : ""}
               </p>
-              <p className="rounded-md border px-3 py-2 focus:border-indigo-600 focus:outline-none">
-                Timestamp: {dePinBadge?.timestamp}
-              </p>
-              {dePinBadge.latitude && (
-                <p className="rounded-md border px-3 py-2 focus:border-indigo-600 focus:outline-none">
-                  Latitude: {dePinBadge?.latitude}
-                </p>
-              )}
-              {dePinBadge.longitude && (
-                <p className="rounded-md border px-3 py-2 focus:border-indigo-600 focus:outline-none">
-                  Longitude: {dePinBadge?.longitude}
-                </p>
-              )}
-              {dePinBadge.verified && (
-                <p className="w-full rounded-md border px-3 py-2 focus:border-indigo-600 focus:outline-none">
-                  Verified: {dePinBadge?.verified ? "true" : "false"}
-                </p>
-              )}
+              <Image
+                src="/depin.png"
+                alt="DePin Badge"
+                width={400}
+                height={400}
+                style={{ margin: "auto" }}
+                onClick={() => {
+                  window.open(
+                    `https://cerscan.com/mainnet/stream/${dePinBadge.id}`,
+                    "_blank",
+                  );
+                }}
+              />
             </div>
           )}
           {fluenceBadge !== null && (
-            <div className="mt-4 w-auto max-w-full shrink-0 rounded-md border-2 border-emerald-600">
-              <label className="flex px-3 py-2 text-sm font-semibold text-gray-800">
+            <div className="mt-4 w-auto max-w-full shrink-0">
+              <p className="m-auto text-center font-semibold text-gray-800">
                 Fluence Badge
-              </label>
-              <p className="w-full rounded-md border px-3 py-2 focus:border-indigo-600 focus:outline-none">
-                Recipient:{" "}
-                {fluenceBadge?.recipient.slice(0, 6) +
-                  "..." +
-                  fluenceBadge?.recipient.slice(-4)}
               </p>
-              <p className="w-full rounded-md border px-3 py-2 focus:border-indigo-600 focus:outline-none">
-                Timestamp: {fluenceBadge?.timestamp}
-              </p>
-              {fluenceBadge.latitude && (
-                <p className="w-full rounded-md border px-3 py-2 focus:border-indigo-600 focus:outline-none">
-                  Latitude: {fluenceBadge?.latitude}
-                </p>
-              )}
-              {fluenceBadge.longitude && (
-                <p className="w-full rounded-md border px-3 py-2 focus:border-indigo-600 focus:outline-none">
-                  Longitude: {fluenceBadge?.longitude}
-                </p>
-              )}
-              {fluenceBadge.verified && (
-                <p className="w-full rounded-md border px-3 py-2 focus:border-indigo-600 focus:outline-none">
-                  Verified: {fluenceBadge?.verified ? "true" : "false"}
-                </p>
-              )}
+              <Image
+                src="/fluence.png"
+                alt="Fluence Badge"
+                width={400}
+                height={400}
+                style={{ margin: "auto" }}
+                onClick={() => {
+                  window.open(
+                    `https://cerscan.com/mainnet/stream/${fluenceBadge.id}`,
+                    "_blank",
+                  );
+                }}
+              />
             </div>
           )}
           {deSciBadge !== null && (
-            <div className="mt-4 w-auto max-w-full shrink-0 rounded-md border-2 border-emerald-600">
-              <label className="flex px-3 py-2 text-sm font-semibold text-gray-800">
+            <div className="mt-4 w-auto max-w-full shrink-0">
+              <p className="m-auto text-center font-semibold text-gray-800">
                 DeSci Badge
-              </label>
-              <p className="w-full rounded-md border px-3 py-2 focus:border-indigo-600 focus:outline-none">
-                Recipient:{" "}
-                {deSciBadge?.recipient.slice(0, 6) +
-                  "..." +
-                  deSciBadge?.recipient.slice(-4)}
               </p>
-              <p className="w-full rounded-md border px-3 py-2 focus:border-indigo-600 focus:outline-none">
-                Timestamp: {deSciBadge?.timestamp}
-              </p>
-              {deSciBadge.latitude && (
-                <p className="w-full rounded-md border px-3 py-2 focus:border-indigo-600 focus:outline-none">
-                  Latitude: {deSciBadge?.latitude}
-                </p>
-              )}
-              {deSciBadge.longitude && (
-                <p className="w-full rounded-md border px-3 py-2 focus:border-indigo-600 focus:outline-none">
-                  Longitude: {deSciBadge?.longitude}
-                </p>
-              )}
-              {deSciBadge.verified && (
-                <p className="w-full rounded-md border px-3 py-2 focus:border-indigo-600 focus:outline-none">
-                  Verified: {deSciBadge?.verified ? "true" : "false"}
-                </p>
-              )}
+              <Image
+                src="/desci.png"
+                alt="DeSci Badge"
+                width={400}
+                height={400}
+                style={{ margin: "auto" }}
+                onClick={() => {
+                  window.open(
+                    `https://cerscan.com/mainnet/stream/${deSciBadge.id}`,
+                    "_blank",
+                  );
+                }}
+              />
             </div>
           )}
           {talentBadge !== null && (
-            <div className="mt-4 w-auto max-w-full shrink-0 rounded-md border-2 border-emerald-600">
-              <label className="flex px-3 py-2 text-sm font-semibold text-gray-800">
-                TalentDAO Hacker House Badge
-              </label>
-              <p className="w-full rounded-md border px-3 py-2 focus:border-indigo-600 focus:outline-none">
-                Recipient:{" "}
-                {talentBadge?.recipient.slice(0, 6) +
-                  "..." +
-                  talentBadge?.recipient.slice(-4)}
+            <div className="mt-4 w-auto max-w-full shrink-0">
+              <p className="m-auto text-center font-semibold text-gray-800">
+                TalentDao Hacker House Badge
               </p>
-              <p className="w-full rounded-md border px-3 py-2 focus:border-indigo-600 focus:outline-none">
-                Timestamp: {talentBadge?.timestamp}
-              </p>
-              {talentBadge.latitude && (
-                <p className="w-full rounded-md border px-3 py-2 focus:border-indigo-600 focus:outline-none">
-                  Latitude: {talentBadge?.latitude}
-                </p>
-              )}
-              {talentBadge.longitude && (
-                <p className="w-full rounded-md border px-3 py-2 focus:border-indigo-600 focus:outline-none">
-                  Longitude: {talentBadge?.longitude}
-                </p>
-              )}
-              {talentBadge.verified && (
-                <p className="w-full rounded-md border px-3 py-2 focus:border-indigo-600 focus:outline-none">
-                  Verified: {talentBadge?.verified ? "true" : "false"}
-                </p>
-              )}
+              <Image
+                src="/talentdao.png"
+                alt="TalentDao Hacker House Badge"
+                width={400}
+                height={400}
+                style={{ margin: "auto" }}
+                onClick={() => {
+                  window.open(
+                    `https://cerscan.com/mainnet/stream/${talentBadge.id}`,
+                    "_blank",
+                  );
+                }}
+              />
             </div>
           )}
           {proofBadge !== null && (
-            <div className="mt-4 w-auto max-w-full shrink-0 rounded-md border-2 border-emerald-600">
-              <label className="flex px-3 py-2 text-sm font-semibold text-gray-800">
+            <div className="mt-4 w-auto max-w-full shrink-0">
+              <p className="m-auto text-center font-semibold text-gray-800">
                 Proof of Data Badge
-              </label>
-              <p className="w-full rounded-md border px-3 py-2 focus:border-indigo-600 focus:outline-none">
-                Recipient:{" "}
-                {proofBadge?.recipient.slice(0, 6) +
-                  "..." +
-                  proofBadge?.recipient.slice(-4)}
               </p>
-              <p className="w-full rounded-md border px-3 py-2 focus:border-indigo-600 focus:outline-none">
-                Timestamp: {proofBadge?.timestamp}
-              </p>
-              {proofBadge.latitude && (
-                <p className="w-full rounded-md border px-3 py-2 focus:border-indigo-600 focus:outline-none">
-                  Latitude: {proofBadge?.latitude}
-                </p>
-              )}
-              {proofBadge.longitude && (
-                <p className="w-full rounded-md border px-3 py-2 focus:border-indigo-600 focus:outline-none">
-                  Longitude: {proofBadge?.longitude}
-                </p>
-              )}
-              {proofBadge.verified && (
-                <p className="w-full rounded-md border px-3 py-2 focus:border-indigo-600 focus:outline-none">
-                  Verified: {proofBadge?.verified ? "true" : "false"}
-                </p>
-              )}
+              <Image
+                src="/proofdata.png"
+                alt="Proof of Data Badge"
+                width={400}
+                height={400}
+                style={{ margin: "auto" }}
+                onClick={() => {
+                  window.open(
+                    `https://cerscan.com/mainnet/stream/${proofBadge.id}`,
+                    "_blank",
+                  );
+                }}
+              />
             </div>
           )}
         </div>

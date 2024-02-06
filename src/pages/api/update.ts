@@ -42,7 +42,7 @@ export default async function updatePg(
     await client.connect();
     // const checkIfUsed = await client.query(`SELECT * FROM is_used WHERE code='${'c8292c'}'`);
     const updateUsedStatus = await client.query(
-      `UPDATE is_used SET used=false WHERE code='${'eaae97'}'`,
+      `UPDATE is_used SET used=false WHERE code='${'b42451'}'`,
     );
     console.log(updateUsedStatus);
     await client.end();
