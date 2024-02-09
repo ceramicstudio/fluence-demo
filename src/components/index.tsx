@@ -61,15 +61,6 @@ const imageMapping = {
   ThreeBadges: "/final.png",
 };
 
-type OpenDataDay = Event;
-type FluenceBooth = Event;
-type DePinDay = Event;
-type DeSciDay = Event;
-type TalentDaoHackerHouse = Event;
-type ProofOfData = Event;
-type FinalBadge = Event;
-type ThreeBadge = Event;
-
 export default function Attest() {
   const [attesting, setAttesting] = useState(false);
   const [eligible, setEligible] = useState(false);
@@ -360,7 +351,10 @@ export default function Attest() {
     return data;
   };
 
-  const createFinal = async (sharedObj: ObjectType, size: number): Promise<Event | undefined> => {
+  const createFinal = async (
+    sharedObj: ObjectType,
+    size: number,
+  ): Promise<Event | undefined> => {
     setAttesting(true);
     const result = await fetch("/api/final", {
       method: "POST",
@@ -403,11 +397,11 @@ export default function Attest() {
     const whichEvent = size === 7 ? "AllBadges" : "ThreeBadges";
     console.log(whichEvent);
 
-      const data = await compose.executeQuery<{
-        createEthDenverAttendance: {
-          document: Event;
-        };
-      }>(`
+    const data = await compose.executeQuery<{
+      createEthDenverAttendance: {
+        document: Event;
+      };
+    }>(`
       mutation{
         createEthDenverAttendance(input: {
           content: {
@@ -428,13 +422,8 @@ export default function Attest() {
         }
       }
     `);
-      console.log(data);
-      // await getRecords();
-     
-      // setBadgeArray(newArray.filter((item) => item !== undefined) as Event[]);
-      // setAttesting(false);
-      // setEligible(false);
-      return data.data?.createEthDenverAttendance?.document;
+    console.log(data);
+    return data.data?.createEthDenverAttendance?.document;
   };
 
   const createClaim = async () => {
