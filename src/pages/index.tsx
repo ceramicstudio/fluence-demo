@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import Navbar from "@/components/nav";
 import { useAccount } from "wagmi";
 import Attest from "@/components";
+import Modal from "@/components/modal";
 
 export default function Home() {
   const { address } = useAccount();
@@ -47,6 +48,7 @@ export default function Home() {
         )}
         <div className="flex min-h-screen min-w-full flex-col items-center justify-start">
           {loggedIn && <Attest />}
+          {loggedIn && <Modal />}
         </div>
       </div>
     </>
