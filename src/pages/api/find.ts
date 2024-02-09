@@ -1,9 +1,10 @@
 import { type NextApiRequest, type NextApiResponse } from "next";
 import * as pg from "pg";
-import { env } from '../../env';
+import { env } from "../../env";
 
-const {DB_PASSWORD, DB_USER, DB_HOST, DB_PORT, DB_NAME} = env;
-const { Client } = pg;
+// const {DB_PASSWORD, DB_USER, DB_HOST, DB_PORT, DB_NAME} = env;
+const { STRING } = env;
+const { Client, Pool } = pg;
 
 export default async function createCredential(
   req: NextApiRequest,
@@ -19,16 +20,32 @@ export default async function createCredential(
     code: string;
   }
 
-  const client = new Client({
-    password: DB_PASSWORD,
-    user: DB_USER,
-    host: DB_HOST,
-    port: Number(DB_PORT),
-    database: DB_NAME,
+  // const client = new Client({
+  //   password: DB_PASSWORD,
+  //   user: DB_USER,
+  //   host: DB_HOST,
+  //   port: Number(DB_PORT),
+  //   database: DB_NAME,
+  // });
+
+  if(!STRING) {
+    return res.json({
+      err: "Missing connection string"
+    })
+  }
+
+  const pool = new Pool({
+    connectionString: STRING,
   });
 
-  const { code }: RequestBody =
-    req.body as RequestBody;
+  await pool.query("SELECT NOW()");
+  await pool.end();
+
+  const client = new Client({
+    connectionString: STRING,
+  });
+
+  const { code }: RequestBody = req.body as RequestBody;
 
   try {
     console.log(env);
@@ -42,19 +59,19 @@ export default async function createCredential(
         return res.json({
           err: "Code not found",
         });
-    } else if ((checkIfUsed.rows[0] as { used: boolean }).used) {
+      } else if ((checkIfUsed.rows[0] as { used: boolean }).used) {
         await client.end();
         return res.json({
-            err: "Code already used",
+          err: "Code already used",
         });
-    } else {
+      } else {
         const event = (checkIfUsed.rows[0] as { event: string }).event;
         console.log(event);
         return res.json(event);
-    }
+      }
     } else {
       return res.json({
-        err: "Missing code or unique key",
+        err: "Missing code",
       });
     }
   } catch (err) {

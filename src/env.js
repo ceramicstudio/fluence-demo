@@ -14,6 +14,7 @@ export const env = createEnv({
     DB_NAME: z.string(),
     DB_HOST: z.string(),
     DB_PORT: z.string(),
+    STRING: z.string(),
   },
 
   /**
@@ -37,6 +38,7 @@ export const env = createEnv({
     DB_NAME: process.env.DB_NAME,
     DB_HOST: process.env.DB_HOST, 
     DB_PORT: process.env.DB_PORT,
+    STRING: process.env.STRING,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

@@ -1,30 +1,58 @@
 import * as pg from "pg";
 import { type NextApiRequest, type NextApiResponse } from "next";
 import crypto from "crypto";
+import { env } from "../../env";
 
-const { Client } = pg;
+const { STRING } = env;
+const { Client, Pool } = pg;
 
 export default async function updatePg(
   req: NextApiRequest,
   res: NextApiResponse,
 ) {
+  // const client = new Client({
+  //   password: "admin",
+  //   user: "admin",
+  //   host: "localhost",
+  //   port: 5432,
+  //   database: "demodb",
+  // });
+
+  if(!STRING) {
+    return res.json({
+      err: "Missing connection string"
+    })
+  }
+
+  const pool = new Pool({
+    connectionString: STRING,
+  });
+
+  await pool.query("SELECT NOW()");
+  await pool.end();
+
   const client = new Client({
-    password: "admin",
-    user: "admin",
-    host: "localhost",
-    port: 5432,
-    database: "demodb",
+    connectionString: STRING,
   });
 
   try {
     await client.connect();
     const createTableString = `
   CREATE TABLE is_used (
-    code text,
+    id SERIAL PRIMARY KEY,
+    code text UNIQUE,
     used boolean,
     event text)
 `;
+
+    const createEmailString = `
+  CREATE TABLE emails (
+    id SERIAL PRIMARY KEY,
+    address text,
+    email text UNIQUE)
+`;
     await client.query(createTableString);
+    await client.query(createEmailString);
     const set = new Set();
     while (set.size < 6000) {
       const code = crypto.randomBytes(3).toString("hex");

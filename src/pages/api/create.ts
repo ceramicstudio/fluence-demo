@@ -6,8 +6,9 @@ import { fromString } from "uint8arrays/from-string";
 import * as pg from "pg";
 import { env } from '../../env';
 
-const {SECRET_KEY, DB_PASSWORD, DB_USER, DB_HOST, DB_PORT, DB_NAME} = env;
-const { Client } = pg;
+// const {SECRET_KEY, DB_PASSWORD, DB_USER, DB_HOST, DB_PORT, DB_NAME} = env;
+const {STRING, SECRET_KEY} = env;
+const { Client, Pool } = pg;
 
 export default async function createCredential(
   req: NextApiRequest,
@@ -23,15 +24,32 @@ export default async function createCredential(
     code: string;
   }
 
-  const client = new Client({
-    password: DB_PASSWORD,
-    user: DB_USER,
-    host: DB_HOST,
-    port: Number(DB_PORT),
-    database: DB_NAME,
+  // const client = new Client({
+  //   password: DB_PASSWORD,
+  //   user: DB_USER,
+  //   host: DB_HOST,
+  //   port: Number(DB_PORT),
+  //   database: DB_NAME,
+  // });
+
+  if(!STRING) {
+    return res.json({
+      err: "Missing connection string"
+    })
+  }
+
+  const pool = new Pool({
+    connectionString: STRING,
   });
 
-  const { location, recipient, event, code }: RequestBody =
+  await pool.query("SELECT NOW()");
+  await pool.end();
+
+  const client = new Client({
+    connectionString: STRING,
+  });
+
+  const { location, recipient, code }: RequestBody =
     req.body as RequestBody;
 
   try {

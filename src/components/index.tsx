@@ -3,13 +3,21 @@ import Image from "next/image";
 import { useAccount, useChainId } from "wagmi";
 import { useComposeDB } from "@/fragments";
 import { DNA } from "react-loader-spinner";
-import { DID, DagJWS } from "dids";
+import { DID, type DagJWS } from "dids";
 import KeyResolver from "key-did-resolver";
-import { set } from "zod";
 
 type Location = {
   latitude: number | undefined;
   longitude: number | undefined;
+};
+
+type ObjectType = {
+  OpenDataDay: string;
+  FluenceBooth: string;
+  DePinDay: string;
+  DeSciDay: string;
+  TalentDaoHackerHouse: string;
+  ProofOfData: string;
 };
 
 type EventString =
@@ -37,6 +45,7 @@ type DePinDay = Event;
 type DeSciDay = Event;
 type TalentDaoHackerHouse = Event;
 type ProofOfData = Event;
+type FinalBadge = Event;
 
 export default function Attest() {
   const [attesting, setAttesting] = useState(false);
@@ -53,6 +62,7 @@ export default function Attest() {
     null,
   );
   const [proofBadge, setProofBadge] = useState<ProofOfData | null>(null);
+  const [allBadges, setAllBadges] = useState<FinalBadge | null>(null);
   const [userLocation, setUserLocation] = useState<Location>({
     latitude: undefined,
     longitude: undefined,
@@ -60,6 +70,40 @@ export default function Attest() {
   const [time, setTime] = useState<Date>();
   const { address } = useAccount();
   const chainId = useChainId();
+
+  const findEvent = async () => {
+    const code = localStorage.getItem("code");
+    if (code) {
+      setCode(code);
+    }
+    const result = await fetch("/api/find", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        code,
+      }),
+    });
+    const data = (await result.json()) as EventString | { err: string };
+    console.log(data);
+    if (typeof data === "string") {
+      setEvent(data);
+      await createEligibility(data);
+    }
+    await getRecords();
+  };
+
+  const updateTime = () => {
+    //update time every second
+    try {
+      setInterval(() => {
+        setTime(new Date());
+      }, 1000);
+    } catch (e) {
+      console.log(e);
+    }
+  };
 
   const getUserLocation = () => {
     // if geolocation is supported by the users browser
@@ -120,31 +164,6 @@ export default function Attest() {
     }
   };
 
-  const findEvent = async () => {
-    const code = localStorage.getItem("code");
-    if (!code) {
-      alert("No unique code provided");
-      return;
-    }
-    setCode(code);
-    const result = await fetch("/api/find", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        code,
-      }),
-    });
-    const data = (await result.json()) as EventString | { err: string };
-    console.log(data);
-    if (typeof data === "string") {
-      setEvent(data);
-      await createEligibility(data);
-    }
-    await getRecords();
-  };
-
   const getRecords = async () => {
     const data = await compose.executeQuery<{
       node: {
@@ -176,7 +195,15 @@ export default function Attest() {
         }
       `);
     console.log(data);
-
+    const keepTrack = new Set();
+    const sharedObj: ObjectType = {
+      OpenDataDay: "",
+      FluenceBooth: "",
+      DePinDay: "",
+      DeSciDay: "",
+      TalentDaoHackerHouse: "",
+      ProofOfData: "",
+    };
     if (
       data.data &&
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
@@ -187,11 +214,9 @@ export default function Attest() {
         try {
           const json = Buffer.from(event.jwt, "base64").toString();
           const parsed = JSON.parse(json) as { jws: DagJWS };
-          console.log(parsed);
           const newDid = new DID({ resolver: KeyResolver.getResolver() });
           const result = await newDid.verifyJWS(parsed.jws);
           const didFromJwt = result.didResolutionResult.didDocument?.id;
-          console.log("This is the payload: ", didFromJwt);
           if (event.latitude === 0) {
             event.latitude = undefined;
           }
@@ -215,12 +240,32 @@ export default function Attest() {
                       ? setTalentBadge(event)
                       : event.event === "ProofOfData"
                         ? setProofBadge(event)
+                        : event.event === "AllBadges"
+                          ? setAllBadges(event)
+                          : null;
+            keepTrack.add(event.event);
+            event.event === "OpenDataDay"
+              ? (sharedObj.OpenDataDay = event.id)
+              : event.event === "FluenceBooth"
+                ? (sharedObj.FluenceBooth = event.id)
+                : event.event === "DePinDay"
+                  ? (sharedObj.DePinDay = event.id)
+                  : event.event === "DeSciDay"
+                    ? (sharedObj.DeSciDay = event.id)
+                    : event.event === "TalentDaoHackerHouse"
+                      ? (sharedObj.TalentDaoHackerHouse = event.id)
+                      : event.event === "ProofOfData"
+                        ? (sharedObj.ProofOfData = event.id)
                         : null;
           }
-          console.log(talentBadge)
         } catch (e) {
           console.log(e);
         }
+      }
+      if (keepTrack.size === 6) {
+        console.log(keepTrack);
+        console.log("All badges have been collected");
+        await createFinal(sharedObj);
       }
     }
   };
@@ -293,20 +338,72 @@ export default function Attest() {
     return data;
   };
 
+  const createFinal = async (sharedObj: ObjectType) => {
+    setAttesting(true);
+    const result = await fetch("/api/final", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        recipient: address,
+        OpenDataDay: sharedObj.OpenDataDay,
+        FluenceBooth: sharedObj.FluenceBooth,
+        DePinDay: sharedObj.DePinDay,
+        DeSciDay: sharedObj.DeSciDay,
+        TalentDaoHackerHouse: sharedObj.TalentDaoHackerHouse,
+        ProofOfData: sharedObj.ProofOfData,
+      }),
+    });
+    type returnType = {
+      err?: unknown;
+      recipient: string;
+      jwt: string;
+      OpenDataDay: string;
+      FluenceBooth: string;
+      DePinDay: string;
+      DeSciDay: string;
+      TalentDaoHackerHouse: string;
+      ProofOfData: string;
+      timestamp: string;
+    };
+    const finalClaim = (await result.json()) as returnType;
+    console.log(finalClaim);
+    if (finalClaim.err) {
+      setAttesting(false);
+      alert(finalClaim.err);
+      return;
+    }
+    const data = await compose.executeQuery(`
+    mutation{
+      createEthDenverAttendance(input: {
+        content: {
+          recipient: "${finalClaim.recipient}"
+          timestamp: "${finalClaim.timestamp}"
+          jwt: "${finalClaim.jwt}"
+          event: "AllBadges"
+        }
+      })
+      {
+        document{
+          id
+          recipient
+          timestamp
+          jwt
+          event
+        }
+      }
+    }
+  `);
+    setAttesting(false);
+    // await getRecords();
+    setEligible(false);
+    return data;
+  };
+
   const createClaim = async () => {
     const finalClaim = await createBadge();
     console.log(finalClaim);
-  };
-
-  const updateTime = () => {
-    //update time every second
-    try {
-      setInterval(() => {
-        setTime(new Date());
-      }, 1000);
-    } catch (e) {
-      console.log(e);
-    }
   };
 
   useEffect(() => {
@@ -317,7 +414,7 @@ export default function Attest() {
   return (
     <div className="flex min-h-screen min-w-full flex-col items-center justify-start gap-6 px-4 py-8 sm:py-16 md:py-24">
       <div
-        className="w-3/4 rounded-md bg-white p-6 shadow-xl shadow-rose-600/40 ring-2 ring-indigo-600"
+        className="w-3/4 rounded-md bg-slate-300 p-6 shadow-xl shadow-rose-600/40 ring-2 ring-black-600"
         style={{ height: "fit-content", minHeight: "35rem" }}
       >
         <form className="mt-4" key={1}>
@@ -400,9 +497,29 @@ export default function Attest() {
           )}
         </form>
         <h2 className="mb-8 mt-6 text-center text-3xl font-semibold text-gray-800">
-          Your Badges: 
+          Your Badges:
         </h2>
         <div className="flex-auto flex-row flex-wrap items-center justify-center">
+          {allBadges !== null && (
+            <div className="mt-4 w-auto max-w-full shrink-0">
+              <p className="m-auto text-center font-semibold text-gray-800">
+                All Badges
+              </p>
+              <Image
+                src="/all.png"
+                alt="All Badges"
+                width={400}
+                height={400}
+                style={{ margin: "auto" }}
+                onClick={() => {
+                  window.open(
+                    `https://cerscan.com/mainnet/stream/${allBadges.id}`,
+                    "_blank",
+                  );
+                }}
+              />
+            </div>
+          )}
           {openDataBadge !== null && (
             <div className="mt-4 w-auto max-w-full shrink-0">
               <p className="m-auto text-center font-semibold text-gray-800">

@@ -2,19 +2,36 @@ import { type NextApiRequest, type NextApiResponse } from "next";
 import * as pg from "pg";
 import { env } from "../../env";
 
-const { DB_PASSWORD, DB_USER, DB_HOST, DB_PORT, DB_NAME } = env;
-const { Client } = pg;
+const { STRING } = env;
+const { Client, Pool } = pg;
 
 export default async function createCredential(
   req: NextApiRequest,
   res: NextApiResponse,
 ) {
+  //   const client = new Client({
+  //     password: DB_PASSWORD,
+  //     user: DB_USER,
+  //     host: DB_HOST,
+  //     port: Number(DB_PORT),
+  //     database: DB_NAME,
+  //   });
+
+  if (!STRING) {
+    return res.json({
+      err: "Missing connection string",
+    });
+  }
+
+  const pool = new Pool({
+    connectionString: STRING,
+  });
+
+  await pool.query("SELECT NOW()");
+  await pool.end();
+
   const client = new Client({
-    password: DB_PASSWORD,
-    user: DB_USER,
-    host: DB_HOST,
-    port: Number(DB_PORT),
-    database: DB_NAME,
+    connectionString: STRING,
   });
 
   try {
