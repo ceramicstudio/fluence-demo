@@ -39,6 +39,28 @@ interface Event {
   id: string;
 }
 
+const badgeNames = {
+  OpenDataDay: "Open Data Day",
+  FluenceBooth: "Fluence Booth",
+  DePinDay: "DePin Day",
+  DeSciDay: "DeSci Day",
+  TalentDaoHackerHouse: "TalentDao Hacker House",
+  ProofOfData: "Proof of Data",
+  AllBadges: "All Badges Threshhold",
+  ThreeBadges: "Three Badges Threshhold",
+};
+
+const imageMapping = {
+  OpenDataDay: "/opendata.png",
+  FluenceBooth: "/fluence.png",
+  DePinDay: "/depin.png",
+  DeSciDay: "/desci.png",
+  TalentDaoHackerHouse: "/talentdao.png",
+  ProofOfData: "/proofdata.png",
+  AllBadges: "/all.png",
+  ThreeBadges: "/final.png",
+};
+
 type OpenDataDay = Event;
 type FluenceBooth = Event;
 type DePinDay = Event;
@@ -46,6 +68,7 @@ type DeSciDay = Event;
 type TalentDaoHackerHouse = Event;
 type ProofOfData = Event;
 type FinalBadge = Event;
+type ThreeBadge = Event;
 
 export default function Attest() {
   const [attesting, setAttesting] = useState(false);
@@ -54,15 +77,7 @@ export default function Attest() {
   const { compose } = useComposeDB();
   const [event, setEvent] = useState<EventString>();
   const [code, setCode] = useState<string | undefined>(undefined);
-  const [openDataBadge, setOpenDataBadge] = useState<OpenDataDay | null>(null);
-  const [fluenceBadge, setFluenceBadge] = useState<FluenceBooth | null>(null);
-  const [dePinBadge, setDePinBadge] = useState<DePinDay | null>(null);
-  const [deSciBadge, setDeSciBadge] = useState<DeSciDay | null>(null);
-  const [talentBadge, setTalentBadge] = useState<TalentDaoHackerHouse | null>(
-    null,
-  );
-  const [proofBadge, setProofBadge] = useState<ProofOfData | null>(null);
-  const [allBadges, setAllBadges] = useState<FinalBadge | null>(null);
+  const [badgeArray, setBadgeArray] = useState<Event[]>([]);
   const [userLocation, setUserLocation] = useState<Location>({
     latitude: undefined,
     longitude: undefined,
@@ -196,6 +211,7 @@ export default function Attest() {
       `);
     console.log(data);
     const keepTrack = new Set();
+    const tempArray = [];
     const sharedObj: ObjectType = {
       OpenDataDay: "",
       FluenceBooth: "",
@@ -213,37 +229,33 @@ export default function Attest() {
         const event = el.node;
         try {
           const json = Buffer.from(event.jwt, "base64").toString();
-          const parsed = JSON.parse(json) as { jws: DagJWS };
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+          const parsed = JSON.parse(json) as DagJWS;
           const newDid = new DID({ resolver: KeyResolver.getResolver() });
-          const result = await newDid.verifyJWS(parsed.jws);
-          const didFromJwt = result.didResolutionResult.didDocument?.id;
-          if (event.latitude === 0) {
+          const result = parsed.payload
+            ? await newDid.verifyJWS(parsed)
+            : undefined;
+          const didFromJwt = result?.payload
+            ? result.didResolutionResult.didDocument?.id
+            : undefined;
+          if (event.latitude === 0 || event.latitude === null) {
             event.latitude = undefined;
           }
-          if (event.longitude === 0) {
+          if (event.longitude === 0 || event.longitude === null) {
             event.longitude = undefined;
           }
+          console.log(result, event.event);
           if (
             didFromJwt ===
-            "did:key:z6MkqusKQfvJm7CPiSRkPsGkdrVhTy8EVcQ65uB5H2wWzMMQ"
+              "did:key:z6MkqusKQfvJm7CPiSRkPsGkdrVhTy8EVcQ65uB5H2wWzMMQ" &&
+            result?.payload &&
+            result.payload.timestamp === event.timestamp &&
+            result.payload.event === event.event &&
+            result.payload.recipient === address?.toLowerCase()
           ) {
             event.verified = true;
-            event.event === "OpenDataDay"
-              ? setOpenDataBadge(event)
-              : event.event === "FluenceBooth"
-                ? setFluenceBadge(event)
-                : event.event === "DePinDay"
-                  ? setDePinBadge(event)
-                  : event.event === "DeSciDay"
-                    ? setDeSciBadge(event)
-                    : event.event === "TalentDaoHackerHouse"
-                      ? setTalentBadge(event)
-                      : event.event === "ProofOfData"
-                        ? setProofBadge(event)
-                        : event.event === "AllBadges"
-                          ? setAllBadges(event)
-                          : null;
             keepTrack.add(event.event);
+            tempArray.push(event);
             event.event === "OpenDataDay"
               ? (sharedObj.OpenDataDay = event.id)
               : event.event === "FluenceBooth"
@@ -262,11 +274,21 @@ export default function Attest() {
           console.log(e);
         }
       }
-      if (keepTrack.size === 6) {
+      // console.log(keepTrack.size);
+      if (keepTrack.size === 3 || keepTrack.size === 7) {
         console.log(keepTrack);
         console.log("All badges have been collected");
-        await createFinal(sharedObj);
+        const itemToPush = await createFinal(sharedObj, keepTrack.size);
+        itemToPush && tempArray.push(itemToPush);
       }
+      //order badgeArray by timestamp
+      tempArray.sort((a, b) => {
+        return (
+          new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+        );
+      });
+      console.log(tempArray);
+      setBadgeArray(tempArray);
     }
   };
 
@@ -338,7 +360,7 @@ export default function Attest() {
     return data;
   };
 
-  const createFinal = async (sharedObj: ObjectType) => {
+  const createFinal = async (sharedObj: ObjectType, size: number): Promise<Event | undefined> => {
     setAttesting(true);
     const result = await fetch("/api/final", {
       method: "POST",
@@ -347,12 +369,15 @@ export default function Attest() {
       },
       body: JSON.stringify({
         recipient: address,
-        OpenDataDay: sharedObj.OpenDataDay,
-        FluenceBooth: sharedObj.FluenceBooth,
-        DePinDay: sharedObj.DePinDay,
-        DeSciDay: sharedObj.DeSciDay,
-        TalentDaoHackerHouse: sharedObj.TalentDaoHackerHouse,
-        ProofOfData: sharedObj.ProofOfData,
+        OpenDataDay: sharedObj.OpenDataDay ? sharedObj.OpenDataDay : "",
+        FluenceBooth: sharedObj.FluenceBooth ? sharedObj.FluenceBooth : "",
+        DePinDay: sharedObj.DePinDay ? sharedObj.DePinDay : "",
+        DeSciDay: sharedObj.DeSciDay ? sharedObj.DeSciDay : "",
+        TalentDaoHackerHouse: sharedObj.TalentDaoHackerHouse
+          ? sharedObj.TalentDaoHackerHouse
+          : "",
+        ProofOfData: sharedObj.ProofOfData ? sharedObj.ProofOfData : "",
+        event: size === 7 ? "AllBadges" : "ThreeBadges",
       }),
     });
     type returnType = {
@@ -366,39 +391,50 @@ export default function Attest() {
       TalentDaoHackerHouse: string;
       ProofOfData: string;
       timestamp: string;
+      event: string;
     };
     const finalClaim = (await result.json()) as returnType;
     console.log(finalClaim);
     if (finalClaim.err) {
       setAttesting(false);
       alert(finalClaim.err);
-      return;
+      return undefined;
     }
-    const data = await compose.executeQuery(`
-    mutation{
-      createEthDenverAttendance(input: {
-        content: {
-          recipient: "${finalClaim.recipient}"
-          timestamp: "${finalClaim.timestamp}"
-          jwt: "${finalClaim.jwt}"
-          event: "AllBadges"
-        }
-      })
-      {
-        document{
-          id
-          recipient
-          timestamp
-          jwt
-          event
+    const whichEvent = size === 7 ? "AllBadges" : "ThreeBadges";
+    console.log(whichEvent);
+
+      const data = await compose.executeQuery<{
+        createEthDenverAttendance: {
+          document: Event;
+        };
+      }>(`
+      mutation{
+        createEthDenverAttendance(input: {
+          content: {
+            recipient: "${finalClaim.recipient}"
+            timestamp: "${finalClaim.timestamp}"
+            jwt: "${finalClaim.jwt}"
+            event: "${whichEvent}"
+          }
+        })
+        {
+          document{
+            id
+            recipient
+            timestamp
+            jwt
+            event
+          }
         }
       }
-    }
-  `);
-    setAttesting(false);
-    // await getRecords();
-    setEligible(false);
-    return data;
+    `);
+      console.log(data);
+      // await getRecords();
+     
+      // setBadgeArray(newArray.filter((item) => item !== undefined) as Event[]);
+      // setAttesting(false);
+      // setEligible(false);
+      return data.data?.createEthDenverAttendance?.document;
   };
 
   const createClaim = async () => {
@@ -414,7 +450,7 @@ export default function Attest() {
   return (
     <div className="flex min-h-screen min-w-full flex-col items-center justify-start gap-6 px-4 py-8 sm:py-16 md:py-24">
       <div
-        className="w-3/4 rounded-md bg-slate-300 p-6 shadow-xl shadow-rose-600/40 ring-2 ring-black-600"
+        className="ring-black-600 w-3/4 rounded-md bg-slate-300 p-6 shadow-xl shadow-rose-600/40 ring-2"
         style={{ height: "fit-content", minHeight: "35rem" }}
       >
         <form className="mt-4" key={1}>
@@ -500,10 +536,36 @@ export default function Attest() {
           Your Badges:
         </h2>
         <div className="flex-auto flex-row flex-wrap items-center justify-center">
-          {allBadges !== null && (
+          {badgeArray.length > 0 &&
+            badgeArray.map((badge, index) => {
+              return (
+                <div
+                  className="mt-4 w-auto max-w-full shrink-0"
+                  key={badge.event}
+                >
+                  <p className="m-auto text-center font-semibold text-gray-800">
+                    {badgeNames[badge.event as EventString]}
+                  </p>
+                  <Image
+                    src={imageMapping[badge.event as EventString]}
+                    alt={badge.event}
+                    width={400}
+                    height={400}
+                    style={{ margin: "auto" }}
+                    onClick={() => {
+                      window.open(
+                        `https://cerscan.com/mainnet/stream/${badge.id}`,
+                        "_blank",
+                      );
+                    }}
+                  />
+                </div>
+              );
+            })}
+          {/* {allBadges !== null && (
             <div className="mt-4 w-auto max-w-full shrink-0">
               <p className="m-auto text-center font-semibold text-gray-800">
-                All Badges
+                3 Event Threshhold Badge
               </p>
               <Image
                 src="/all.png"
@@ -639,7 +701,7 @@ export default function Attest() {
                 }}
               />
             </div>
-          )}
+          )} */}
         </div>
       </div>
     </div>

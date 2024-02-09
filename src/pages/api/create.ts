@@ -94,7 +94,7 @@ export default async function createCredential(
         location.longitude !== undefined && (badge.longitude = location.longitude);
         console.log(badge);
 
-        const jws = await staticDid.createDagJWS(badge);
+        const jws = await staticDid.createJWS(badge);
         const jwsJsonStr = JSON.stringify(jws);
         const jwsJsonB64 = Buffer.from(jwsJsonStr).toString("base64");
         const completeBadge = {

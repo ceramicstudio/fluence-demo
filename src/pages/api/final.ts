@@ -19,6 +19,7 @@ export default async function createCredential(
     DeSciDay: string;
     OpenDataDay: string;
     TalentDaoHackerHouse: string;
+    event: string;
   }
 
   const {
@@ -29,6 +30,7 @@ export default async function createCredential(
     DeSciDay,
     OpenDataDay,
     TalentDaoHackerHouse,
+    event
   }: RequestBody = req.body as RequestBody;
 
   try {
@@ -49,6 +51,7 @@ export default async function createCredential(
       OpenDataDay: string;
       TalentDaoHackerHouse: string;
       timestamp: string;
+      event: string;
     } = {
       recipient: recipient.toLowerCase(),
       FluenceBooth,
@@ -58,10 +61,11 @@ export default async function createCredential(
       OpenDataDay,
       TalentDaoHackerHouse,
       timestamp: new Date().toISOString(),
+      event,
     };
     console.log(badge);
 
-    const jws = await staticDid.createDagJWS(badge);
+    const jws = await staticDid.createJWS(badge);
     const jwsJsonStr = JSON.stringify(jws);
     const jwsJsonB64 = Buffer.from(jwsJsonStr).toString("base64");
     const completeBadge = {
