@@ -39,7 +39,6 @@ export default async function createCredential(
   });
 
   try {
-    console.log(env);
     await client.connect();
     const containsEmail = await client.query(
       `SELECT * FROM emails WHERE address='${address.toLowerCase()}'`,

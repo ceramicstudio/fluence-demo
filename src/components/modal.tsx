@@ -26,6 +26,8 @@ export default function Modal() {
     };
     if (!data.rows.length) {
       setShowModal(true);
+    } else {
+      setShowModal(false);
     }
   };
 

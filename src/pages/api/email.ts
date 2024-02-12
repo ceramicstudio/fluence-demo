@@ -40,7 +40,6 @@ export default async function createCredential(
   });
 
   try {
-    console.log(env);
     await client.connect();
     const newEmailString = `INSERT INTO emails (address, email) VALUES ('${recipient.toLowerCase()}', '${email}')`;
     const result = await client.query(newEmailString);

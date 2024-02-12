@@ -19,21 +19,21 @@ const Navbar = () => {
             href="/"
             className="text-white transition duration-300 hover:text-gray-300"
           >
-            <div className="flex items-center flex-col">
-                <span className="flex flex-row">
-                    <div className="aspect-square"> 
-              <Image
-                src="https://developers.ceramic.network/img/logo.svg"
-                width={30}
-                height={30}
-                alt="Ceramic Logo"
-              />
-              </div>
-              <div className="ml-3 text-lg font-bold text-white">
-                EthDenver24 Scavenger Hunt
-              </div>
+            <div className="flex flex-col items-center">
+              <span className="flex flex-row">
+                <div className="aspect-square">
+                  <Image
+                    src="https://developers.ceramic.network/img/logo.svg"
+                    width={30}
+                    height={30}
+                    alt="Ceramic Logo"
+                  />
+                </div>
+                <div className="ml-3 text-lg font-bold text-white">
+                  EthDenver24 Scavenger Hunt
+                </div>
               </span>
-              <div className="mt-4 ml-0 content-start flex flex-row w-full" >
+              <div className="ml-0 mt-4 flex w-full flex-row content-start">
                 <w3m-button size="sm" balance="hide" />
               </div>
             </div>
@@ -42,19 +42,7 @@ const Navbar = () => {
         {/* Navbar links for medium and larger screens */}
         <div className="hidden space-x-4 md:flex">
           <a
-            href="#"
-            className="text-white transition duration-300 hover:text-gray-300"
-          >
-            About
-          </a>
-          <a
-            href="#"
-            className="text-white transition duration-300 hover:text-gray-300"
-          >
-            Your Badges
-          </a>
-          <a
-            href="#"
+            href="/leaderboard"
             className="text-white transition duration-300 hover:text-gray-300"
           >
             Leaderboard
@@ -87,20 +75,15 @@ const Navbar = () => {
           {isMobileMenuOpen && (
             <div className="relative md:hidden ">
               <div className="items-left flex flex-col space-y-4 rounded-lg bg-white/10 bg-opacity-30 p-4 text-white backdrop-blur-lg backdrop-filter">
+                {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
                 <a
-                  href="#"
+                  href="/"
                   className="text-white transition duration-300 hover:text-gray-300"
                 >
-                  About
+                  Home
                 </a>
                 <a
-                  href="#"
-                  className="text-white transition duration-300 hover:text-gray-300"
-                >
-                  Your Badges
-                </a>
-                <a
-                  href="#"
+                  href="/leaderboard"
                   className="text-white transition duration-300 hover:text-gray-300"
                 >
                   Leaderboard

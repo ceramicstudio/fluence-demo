@@ -27,7 +27,6 @@ export default async function createCredential(
   });
 
   try {
-    console.log(env);
     await client.connect();
     const checkIfUsed = await client.query(
       `UPDATE is_used SET used=false WHERE used=true`,

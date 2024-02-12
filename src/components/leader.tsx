@@ -1,0 +1,272 @@
+import { useState, useEffect } from "react";
+import Image from "next/image";
+import { useAccount, useChainId } from "wagmi";
+import { useComposeDB } from "@/fragments";
+import { DNA } from "react-loader-spinner";
+import { DID, type DagJWS } from "dids";
+import KeyResolver from "key-did-resolver";
+
+type EventString =
+  | "OpenDataDay"
+  | "FluenceBooth"
+  | "DePinDay"
+  | "DeSciDay"
+  | "TalentDaoHackerHouse"
+  | "ProofOfData";
+
+interface Event {
+  recipient: string;
+  latitude?: number;
+  longitude?: number;
+  verified?: boolean;
+  timestamp: string;
+  jwt: string;
+  event: EventString;
+  id: string;
+}
+
+const badgeNames = {
+  OpenDataDay: "Open Data Day",
+  FluenceBooth: "Fluence Booth",
+  DePinDay: "DePin Day",
+  DeSciDay: "DeSci Day",
+  TalentDaoHackerHouse: "TalentDao Hacker House",
+  ProofOfData: "Proof of Data",
+  ThreeBadges: "Three Badges Threshhold",
+  AllBadges: "All Badges Threshhold",
+};
+
+const countObject = {
+  OpenDataDay: 0,
+  FluenceBooth: 0,
+  DePinDay: 0,
+  DeSciDay: 0,
+  TalentDaoHackerHouse: 0,
+  ProofOfData: 0,
+  ThreeBadges: 0,
+  AllBadges: 0,
+};
+
+const imageMapping = {
+  OpenDataDay: "/opendata.png",
+  FluenceBooth: "/fluence.png",
+  DePinDay: "/depin.png",
+  DeSciDay: "/desci.png",
+  TalentDaoHackerHouse: "/talentdao.png",
+  ProofOfData: "/proofdata.png",
+  AllBadges: "/all.png",
+  ThreeBadges: "/final.png",
+};
+
+export default function Leader() {
+  const [count, setCount] = useState<typeof countObject>(countObject);
+  const { compose } = useComposeDB();
+  const [participants, setParticipants] = useState<
+    [address: string, event: string][]
+  >([]);
+  const [max, setMax] = useState<number>(0);
+  const [participantCount, setParticipantCount] = useState<number>(0);
+  const [time, setTime] = useState<Date>();
+  const { address } = useAccount();
+  const chainId = useChainId();
+
+  const findEvent = async () => {
+    await checkParticipants();
+  };
+
+  const checkValid = async (event: Event[]) => {
+    const returnVal: Event[] = [];
+    for (const el of event) {
+      const json = Buffer.from(el.jwt, "base64").toString();
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      const parsed = JSON.parse(json) as DagJWS;
+      const newDid = new DID({ resolver: KeyResolver.getResolver() });
+      const result = parsed.payload
+        ? await newDid.verifyJWS(parsed)
+        : undefined;
+      const didFromJwt = result?.payload
+        ? result.didResolutionResult.didDocument?.id
+        : undefined;
+      if (el.latitude === 0 || el.latitude === null) {
+        el.latitude = undefined;
+      }
+      if (el.longitude === 0 || el.longitude === null) {
+        el.longitude = undefined;
+      }
+      console.log(didFromJwt, address?.toLowerCase());
+      if (
+        didFromJwt ===
+          "did:key:z6MknfS5JdwaTV52StbPjzxZcZftJSkyfLT2oje66aa5Fajm" &&
+        result?.payload &&
+        result.payload.timestamp === el.timestamp &&
+        result.payload.event === el.event &&
+        result.payload.recipient === el.recipient
+      ) {
+        console.log(result, el.event);
+        returnVal.push(el);
+      }
+    }
+    return returnVal;
+  };
+
+  const checkParticipants = async () => {
+    const data = await compose.executeQuery<{
+      ethDenverAttendanceCount: number;
+    }>(`
+        query Count{
+          ethDenverAttendanceCount
+        }
+      `);
+    console.log(data);
+    const data2 = await compose.executeQuery<{
+      ethDenverAttendanceIndex: {
+        edges: {
+          node: Event;
+        }[];
+      };
+    }>(`
+          query {
+            ethDenverAttendanceIndex(last: ${data.data?.ethDenverAttendanceCount}) {
+              edges {
+                node {
+                  id
+                  recipient
+                  latitude
+                  longitude
+                  timestamp
+                  jwt
+                  event
+                }
+              }
+            }
+          }
+        `);
+    const results = data2.data?.ethDenverAttendanceIndex.edges;
+    //ensure a unique list of [recipient, event] pairs
+    if (results) {
+      const final = await checkValid(results.map((el) => el.node));
+      const unique = Array.from(
+        new Set(
+          final.map((el) => {
+            return JSON.stringify([el.recipient, el.event]);
+          }),
+        ),
+      ).map((el) => {
+        return JSON.parse(el) as [address: string, event: string];
+      });
+      console.log(unique);
+      setParticipants(unique);
+      //count the number of participants who have completed each event based on the unique list
+      const countObj = unique.reduce(
+        (acc, [address, event]) => {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+          acc[event as keyof typeof acc] = acc[event as keyof typeof acc]
+            ? acc[event as keyof typeof acc] + 1
+            : 1;
+          return acc;
+        },
+        {} as typeof countObject,
+      );
+
+      //count the total number of unique participants based on the unique list
+      const participantCount = unique.reduce((acc, [address, event]) => {
+        return acc.add(address);
+      }, new Set<string>()).size;
+      console.log(countObj);
+      const arr = Object.keys(countObj).map(function (key) {
+        return countObj[key as keyof typeof countObj];
+      });
+      const maximum = Math.max(...arr);
+      setMax(maximum);
+      setParticipantCount(participantCount);
+      setCount(countObj);
+    }
+  };
+
+  useEffect(() => {
+    void findEvent();
+  }, [address, chainId]);
+
+  return (
+    <div className="flex min-h-screen min-w-full flex-col items-center justify-start gap-6 px-4 py-8 sm:py-16 md:py-24">
+      <div
+        className="ring-black-600 w-full rounded-md bg-slate-300 p-6 shadow-xl shadow-rose-600/40 ring-2"
+        style={{ height: "fit-content", minHeight: "35rem" }}
+      >
+        <div className="justify-left flex-auto flex-row flex-wrap items-center">
+          {max > 0 ? (
+            Object.keys(badgeNames).map((badge, index) => {
+              return (
+                <>
+                  <div
+                    className="m-2 mt-4 min-h-48 w-auto max-w-full shrink-0  rounded-md border-2 bg-white p-5 shadow-lg"
+                    key={badge}
+                  >
+                    <div className="flex w-20 flex-col content-start items-start justify-evenly">
+                      <p className="m-auto text-center font-semibold text-gray-800">
+                        {badgeNames[badge as keyof typeof badgeNames]}
+                      </p>
+                      <Image
+                        src={imageMapping[badge as keyof typeof imageMapping]}
+                        alt={badge}
+                        width={80}
+                        height={80}
+                        style={{ margin: "auto", marginTop: "2rem" }}
+                      />
+                    </div>
+                    {count[badge as keyof typeof countObject] ? (
+                      <div className="mt-7 flex w-full flex-row items-center justify-start">
+                        <div className="flex w-full flex-col items-center justify-start">
+                          <div className="flex w-full flex-row items-center justify-start">
+                            <div
+                              className="h-1 w-full rounded-md bg-slate-300 border-2"
+                              style={{
+                                width: `${
+                                  (count[badge as keyof typeof countObject] /
+                                    max) *
+                                  100
+                                }%`,
+                                height: "2rem",
+                              }}
+                            ></div>
+                          </div>
+                          <p className="text-center text-gray-800">
+                            {count[badge as keyof typeof countObject]} /{" "}
+                            {participantCount} Participants have Claimed
+                          </p>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="mt-7 flex w-full flex-row items-center justify-start">
+                        <div className="flex w-full flex-col items-center justify-start">
+                          <div className="flex w-full flex-row items-center justify-start">
+                            <div
+                              className="h-1 w-full rounded-md border-2"
+                              style={{
+                                width: `100%`,
+                                height: "2rem",
+                              }}
+                            ></div>
+                          </div>
+                          <p className="text-center text-gray-800">
+                            0 /{" "}
+                            {participantCount} Participants have Claimed
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </>
+              );
+            })
+          ) : (
+            <div className="m-auto flex w-full flex-col items-center justify-center">
+              <DNA height={100} width={100} />
+              <p className="text-center text-gray-800">Loading Event Data...</p>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}

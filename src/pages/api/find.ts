@@ -48,7 +48,6 @@ export default async function createCredential(
   const { code }: RequestBody = req.body as RequestBody;
 
   try {
-    console.log(env);
     if (code) {
       await client.connect();
       const checkIfUsed = await client.query(

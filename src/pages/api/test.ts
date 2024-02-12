@@ -27,7 +27,6 @@ export default async function createCredential(
   });
 
   try {
-    console.log(env);
     await client.connect();
     const clientq = await client.query("SELECT NOW()");
     await client.end();

@@ -238,7 +238,7 @@ export default function Attest() {
           console.log(result, event.event);
           if (
             didFromJwt ===
-              "did:key:z6MkqusKQfvJm7CPiSRkPsGkdrVhTy8EVcQ65uB5H2wWzMMQ" &&
+              "did:key:z6MknfS5JdwaTV52StbPjzxZcZftJSkyfLT2oje66aa5Fajm" &&
             result?.payload &&
             result.payload.timestamp === event.timestamp &&
             result.payload.event === event.event &&
