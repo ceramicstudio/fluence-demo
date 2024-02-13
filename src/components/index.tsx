@@ -222,6 +222,8 @@ export default function Attest() {
           const json = Buffer.from(event.jwt, "base64").toString();
           // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
           const parsed = JSON.parse(json) as DagJWS;
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
           const newDid = new DID({ resolver: KeyResolver.getResolver() });
           const result = parsed.payload
             ? await newDid.verifyJWS(parsed)

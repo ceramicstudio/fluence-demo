@@ -30,17 +30,19 @@ export default async function createCredential(
     DeSciDay,
     OpenDataDay,
     TalentDaoHackerHouse,
-    event
+    event,
   }: RequestBody = req.body as RequestBody;
 
   try {
     const key = fromString(SECRET_KEY, "base16");
     const provider = new Ed25519Provider(key);
     const staticDid = new DID({
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
       resolver: KeyResolver.getResolver(),
       provider,
     });
-    console.log(req.body)
+    console.log(req.body);
     await staticDid.authenticate();
     const badge: {
       recipient: string;

@@ -22,7 +22,7 @@ export default function Modal() {
           email: string;
           address: string;
         },
-      ];
+      ]
     };
     if (!data.rows.length) {
       setShowModal(true);

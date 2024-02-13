@@ -80,6 +80,8 @@ export default function Leader() {
       const json = Buffer.from(el.jwt, "base64").toString();
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const parsed = JSON.parse(json) as DagJWS;
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
       const newDid = new DID({ resolver: KeyResolver.getResolver() });
       const result = parsed.payload
         ? await newDid.verifyJWS(parsed)
@@ -219,7 +221,7 @@ export default function Leader() {
                         <div className="flex w-full flex-col items-center justify-start">
                           <div className="flex w-full flex-row items-center justify-start">
                             <div
-                              className="h-1 w-full rounded-md bg-slate-300 border-2"
+                              className="h-1 w-full rounded-md border-2 bg-slate-300"
                               style={{
                                 width: `${
                                   (count[badge as keyof typeof countObject] /
@@ -249,8 +251,7 @@ export default function Leader() {
                             ></div>
                           </div>
                           <p className="text-center text-gray-800">
-                            0 /{" "}
-                            {participantCount} Participants have Claimed
+                            0 / {participantCount} Participants have Claimed
                           </p>
                         </div>
                       </div>

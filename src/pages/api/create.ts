@@ -4,10 +4,10 @@ import KeyResolver from "key-did-resolver";
 import { type NextApiRequest, type NextApiResponse } from "next";
 import { fromString } from "uint8arrays/from-string";
 import * as pg from "pg";
-import { env } from '../../env';
+import { env } from "../../env";
 
 // const {SECRET_KEY, DB_PASSWORD, DB_USER, DB_HOST, DB_PORT, DB_NAME} = env;
-const {STRING, SECRET_KEY} = env;
+const { STRING, SECRET_KEY } = env;
 const { Client, Pool } = pg;
 
 export default async function createCredential(
@@ -32,10 +32,10 @@ export default async function createCredential(
   //   database: DB_NAME,
   // });
 
-  if(!STRING) {
+  if (!STRING) {
     return res.json({
-      err: "Missing connection string"
-    })
+      err: "Missing connection string",
+    });
   }
 
   const pool = new Pool({
@@ -49,8 +49,7 @@ export default async function createCredential(
     connectionString: STRING,
   });
 
-  const { location, recipient, code }: RequestBody =
-    req.body as RequestBody;
+  const { location, recipient, code }: RequestBody = req.body as RequestBody;
 
   try {
     if (code && SECRET_KEY) {
@@ -73,6 +72,8 @@ export default async function createCredential(
         const key = fromString(SECRET_KEY, "base16");
         const provider = new Ed25519Provider(key);
         const staticDid = new DID({
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
           resolver: KeyResolver.getResolver(),
           provider,
         });
@@ -82,15 +83,16 @@ export default async function createCredential(
           recipient: string;
           event: string;
           timestamp: string;
-          latitude?: number; 
-          longitude?: number; 
+          latitude?: number;
+          longitude?: number;
         } = {
           recipient: recipient.toLowerCase(),
           event: event,
           timestamp: new Date().toISOString(),
         };
         location.latitude !== undefined && (badge.latitude = location.latitude);
-        location.longitude !== undefined && (badge.longitude = location.longitude);
+        location.longitude !== undefined &&
+          (badge.longitude = location.longitude);
         console.log(badge);
 
         const jws = await staticDid.createJWS(badge);
@@ -100,9 +102,7 @@ export default async function createCredential(
           ...badge,
           jwt: jwsJsonB64,
         };
-        await client.query(
-          `UPDATE is_used SET used=true WHERE code='${code}'`,
-        );
+        await client.query(`UPDATE is_used SET used=true WHERE code='${code}'`);
         await client.end();
         return res.json(completeBadge);
       }
