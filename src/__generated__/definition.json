@@ -1,0 +1,40 @@
+{
+  "version": "1.1",
+  "models": {
+    "kjzl6hvfrbw6c7oj39nvw09t8jmwdostlg5k57qss5gs7yokr2spauw3senwozy": [
+      {
+        "jws": {
+          "payload": "AXESIJlF4k5nkCQdAJ9sPhHjxAQ_yRJlD7eNYWgF3QzaXeBk",
+          "signatures": [
+            {
+              "signature": "qPBOwWO-vJyuJ-Kinsw12AdwVDGgLuZkS0Hc48I369E3Q6E-RLhpRlpzSCbIQ55awtLH7I4Jd34ChtK2YLFbBA",
+              "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa3N3bXg2QjhCa3FhMUJ6a3NvdmNjWUhOZGtxc3U5R0hHUmJjMW1ucWg5UlJ4I3o2TWtzd214NkI4QmtxYTFCemtzb3ZjY1lITmRrcXN1OUdIR1JiYzFtbnFoOVJSeCJ9"
+            }
+          ],
+          "link": "bafyreiezixre4z4qeqoqbh3mhyi6hraeh7erezipw6gwc2af3ugnuxpamq"
+        },
+        "linkedBlock": "omRkYXRhqWRuYW1lc0V0aERlbnZlckF0dGVuZGFuY2Vldmlld3OhamNvbnRyb2xsZXKhZHR5cGVvZG9jdW1lbnRBY2NvdW50ZnNjaGVtYaZkdHlwZWZvYmplY3RlJGRlZnOhb0dyYXBoUUxEYXRlVGltZaRkdHlwZWZzdHJpbmdldGl0bGVvR3JhcGhRTERhdGVUaW1lZmZvcm1hdGlkYXRlLXRpbWVpbWF4TGVuZ3RoGGRnJHNjaGVtYXgsaHR0cHM6Ly9qc29uLXNjaGVtYS5vcmcvZHJhZnQvMjAyMC0xMi9zY2hlbWFocmVxdWlyZWSEaXJlY2lwaWVudGVldmVudGl0aW1lc3RhbXBjand0anByb3BlcnRpZXOmY2p3dKJkdHlwZWZzdHJpbmdpbWF4TGVuZ3RoGgABhqBlZXZlbnSiZHR5cGVmc3RyaW5naW1heExlbmd0aBhkaGxhdGl0dWRloWR0eXBlZm51bWJlcmlsb25naXR1ZGWhZHR5cGVmbnVtYmVyaXJlY2lwaWVudKNkdHlwZWZzdHJpbmdpbWF4TGVuZ3RoGCppbWluTGVuZ3RoGCppdGltZXN0YW1woWQkcmVmdyMvJGRlZnMvR3JhcGhRTERhdGVUaW1ldGFkZGl0aW9uYWxQcm9wZXJ0aWVz9Gd2ZXJzaW9uYzIuMGlpbnRlcmZhY2X0aXJlbGF0aW9uc6BqaW1wbGVtZW50c4BrZGVzY3JpcHRpb254KUFuIGF0dGVuZGFuY2UgY2xhaW0gYXQgYW4gRXRoRGVudmVyIGV2ZW50b2FjY291bnRSZWxhdGlvbqFkdHlwZWRsaXN0ZmhlYWRlcqNjc2VwZW1vZGVsZW1vZGVsUs4BBAFxcQsACWhtb2RlbC12MWtjb250cm9sbGVyc4F4OGRpZDprZXk6ejZNa3N3bXg2QjhCa3FhMUJ6a3NvdmNjWUhOZGtxc3U5R0hHUmJjMW1ucWg5UlJ4"
+      }
+    ]
+  },
+  "indices": {
+    "kjzl6hvfrbw6c7oj39nvw09t8jmwdostlg5k57qss5gs7yokr2spauw3senwozy": [
+      { "fields": [{ "path": ["recipient"] }] },
+      { "fields": [{ "path": ["event"] }] },
+      { "fields": [{ "path": ["latitude"] }] },
+      { "fields": [{ "path": ["longitude"] }] },
+      { "fields": [{ "path": ["timestamp"] }] }
+    ]
+  },
+  "aliases": {
+    "kjzl6hvfrbw6c7oj39nvw09t8jmwdostlg5k57qss5gs7yokr2spauw3senwozy": "EthDenverAttendance"
+  },
+  "views": {
+    "account": {},
+    "root": {},
+    "models": {
+      "kjzl6hvfrbw6c7oj39nvw09t8jmwdostlg5k57qss5gs7yokr2spauw3senwozy": {}
+    }
+  },
+  "commonEmbeds": []
+}

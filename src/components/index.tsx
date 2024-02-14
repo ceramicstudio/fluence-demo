@@ -214,7 +214,7 @@ export default function Attest() {
     if (
       data.data &&
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
-      (data.data as any).node.ethDenverAttendanceList.edges.length
+      (data.data as any).node.ethDenverAttendanceList !== null
     ) {
       for (const el of data.data.node.ethDenverAttendanceList.edges) {
         const event = el.node;
