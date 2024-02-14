@@ -5,7 +5,7 @@ import { env } from "../../env";
 const { STRING } = env;
 const { Client, Pool } = pg;
 
-export default async function createCredential(
+export async function createCredential(
   req: NextApiRequest,
   res: NextApiResponse,
 ) {

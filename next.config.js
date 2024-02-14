@@ -17,6 +17,10 @@ const config = {
     locales: ["en"],
     defaultLocale: "en",
   },
+  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx'],
+  images: {
+    domains: ['developers.ceramic.network'],
+  },
 };
 
 export default config;
