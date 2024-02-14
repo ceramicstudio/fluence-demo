@@ -4,7 +4,7 @@ import KeyResolver from "key-did-resolver";
 import { type NextApiRequest, type NextApiResponse } from "next";
 import { fromString } from "uint8arrays/from-string";
 import * as pg from "pg";
-import { env } from "../../env";
+import { env } from "../../env.mjs";
 
 // const {SECRET_KEY, DB_PASSWORD, DB_USER, DB_HOST, DB_PORT, DB_NAME} = env;
 const { STRING, SECRET_KEY } = env;

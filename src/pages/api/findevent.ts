@@ -1,6 +1,6 @@
 import { type NextApiRequest, type NextApiResponse } from "next";
 import * as pg from "pg";
-import { env } from "../../env";
+import { env } from "../../env.mjs";
 
 const { STRING } = env;
 const { Client, Pool } = pg;

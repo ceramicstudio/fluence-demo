@@ -3,7 +3,7 @@ import { Ed25519Provider } from "key-did-provider-ed25519";
 import KeyResolver from "key-did-resolver";
 import { type NextApiRequest, type NextApiResponse } from "next";
 import { fromString } from "uint8arrays/from-string";
-import { env } from "../../env";
+import { env } from "../../env.mjs";
 
 const { SECRET_KEY } = env;
 
