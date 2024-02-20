@@ -3,6 +3,7 @@ import { fontFamily } from "tailwindcss/defaultTheme";
 
 export default {
   content: ["./src/**/*.tsx"],
+  darkMode: ['variant', '&:not(.light *)'],
   theme: {
     extend: {
       fontFamily: {
