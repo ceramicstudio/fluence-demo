@@ -19,7 +19,7 @@ type ComposeDBProps = {
   children: ReactNode;
 };
 
-const CERAMIC_URL = process.env.URL ?? "https://ceramic-private-qa.3boxlabs.com";
+const CERAMIC_URL = process.env.URL ?? " https://ceramic-demo.hirenodes.io";
 
 /**
  * Configure ceramic Client & create context.

@@ -462,9 +462,8 @@ export default function Attest() {
                 </label>
                 {share && (
                   <p className="mb-3 text-xs font-light text-gray-800">
-                    {userLocation
-                      ? `${userLocation.latitude}, ${userLocation.longitude}`
-                      : ""}
+                    {userLocation.latitude !== undefined &&
+                      `${userLocation.latitude}, ${userLocation.longitude}`}
                   </p>
                 )}
                 <div className="flex items-center">
@@ -523,15 +522,27 @@ export default function Attest() {
             </>
           )}
         </form>
-        <h2 className="mb-8 mt-6 text-center text-3xl font-semibold text-gray-800">
-          Your Badges:
-        </h2>
+        {badgeArray.length > 0 && (
+          <h2 className="mb-8 mt-6 text-center text-3xl font-semibold text-gray-800">
+            Your Badges:
+          </h2>
+        )}
+        {badgeArray.length === 0 && (
+          <>
+            <h2 className="mb-8 mt-6 text-center text-3xl font-semibold text-gray-800">
+              No Badges Yet
+            </h2>
+            <p className="mb-8 mt-6 text-center text-2xl text-gray-800">
+              Please scan a Disc to begin claiming badges
+            </p>
+          </>
+        )}
         <div className="flex-auto flex-row flex-wrap items-center justify-center">
           {badgeArray.length > 0 &&
             badgeArray.map((badge, index) => {
               return (
                 <div
-                  className="mt-4 w-auto max-w-full shrink-0"
+                  className="mt-4 flex w-auto max-w-full shrink-0 flex-col items-center justify-center rounded-md p-5 shadow-lg"
                   key={badge.event}
                 >
                   <p className="m-auto text-center font-semibold text-gray-800">

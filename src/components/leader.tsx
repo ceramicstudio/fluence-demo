@@ -213,7 +213,6 @@ export default function Leader() {
                         alt={badge}
                         width={80}
                         height={80}
-                        style={{ margin: "auto", marginTop: "2rem" }}
                       />
                     </div>
                     {count[badge as keyof typeof countObject] ? (
