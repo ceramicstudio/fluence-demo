@@ -72,7 +72,7 @@ export default function Attest() {
   const { compose } = useComposeDB();
   const [event, setEvent] = useState<EventString>();
   const [code, setCode] = useState<string | undefined>(undefined);
-  const [badgeArray, setBadgeArray] = useState<Event[]>([]);
+  const [badgeArray, setBadgeArray] = useState<Event[] | undefined>();
   const [pointSum, setPointSum] = useState<number>();
   const [userLocation, setUserLocation] = useState<Location>({
     latitude: undefined,
@@ -670,7 +670,23 @@ export default function Attest() {
             </>
           )}
         </form>
-        {address && badgeArray.length > 0 && (
+        {address && !badgeArray && (
+          <div className="mt-6 flex flex-col justify-center">
+            <p className="text-center text-2xl text-gray-800">
+              Loading your badges...
+            </p>
+            <DNA
+              visible={true}
+              height="80"
+              width="80"
+              ariaLabel="dna-loading"
+              wrapperStyle={{margin: "auto"}}
+              wrapperClass="dna-wrapper"
+            />
+          </div>
+        )
+        }
+        {address && badgeArray !== undefined && badgeArray.length > 0 && (
           <h2 className="mb-8 mt-6 text-center text-3xl font-semibold text-gray-800">
             Your Badges:
           </h2>
@@ -680,7 +696,7 @@ export default function Attest() {
             Points Earned: {pointSum}
           </h3>
         )}
-        {address && badgeArray.length === 0 && (
+        {address && badgeArray !== undefined && badgeArray.length === 0 && (
           <>
             <h2 className="mb-8 mt-6 text-center text-3xl font-semibold text-gray-800">
               No Badges Yet
@@ -696,7 +712,7 @@ export default function Attest() {
           </h2>
         )}
         <div className="flex-auto flex-row flex-wrap items-center justify-center">
-          {badgeArray.length > 0 &&
+          {badgeArray !== undefined && badgeArray.length > 0 &&
             badgeArray.map((badge, index) => {
               return (
                 <div
