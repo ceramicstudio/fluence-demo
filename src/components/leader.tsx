@@ -65,12 +65,8 @@ const imageMapping = {
 export default function Leader() {
   const [count, setCount] = useState<typeof countObject>(countObject);
   const { compose } = useComposeDB();
-  const [participants, setParticipants] = useState<
-    [address: string, event: string][]
-  >([]);
   const [max, setMax] = useState<number>(0);
   const [participantCount, setParticipantCount] = useState<number>(0);
-  const [time, setTime] = useState<Date>();
   const { address } = useAccount();
   const chainId = useChainId();
 
@@ -78,8 +74,29 @@ export default function Leader() {
     await checkParticipants();
   };
 
+  const getDid = async () => {
+    try {
+      const result = await fetch("/api/checkdid", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      type returnType = {
+        err?: unknown;
+        did: string;
+      };
+      const finalDid = (await result.json()) as returnType;
+      console.log(finalDid);
+      return finalDid.did;
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
   const checkValid = async (event: Event[]) => {
     const returnVal: Event[] = [];
+    const did = await getDid();
     for (const el of event) {
       const json = Buffer.from(el.jwt, "base64").toString();
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -102,7 +119,7 @@ export default function Leader() {
       console.log(didFromJwt, address?.toLowerCase());
       if (
         didFromJwt ===
-          "did:key:z6MknfS5JdwaTV52StbPjzxZcZftJSkyfLT2oje66aa5Fajm" &&
+        did &&
         result?.payload &&
         result.payload.timestamp === el.timestamp &&
         result.payload.event === el.event &&
@@ -161,7 +178,6 @@ export default function Leader() {
         return JSON.parse(el) as [address: string, event: string];
       });
       console.log(unique);
-      setParticipants(unique);
       //count the number of participants who have completed each event based on the unique list
       const countObj = unique.reduce(
         (acc, [address, event]) => {
@@ -226,11 +242,10 @@ export default function Leader() {
                             <div
                               className="h-1 w-full rounded-md border-2 bg-slate-300"
                               style={{
-                                width: `${
-                                  (count[badge as keyof typeof countObject] /
+                                width: `${(count[badge as keyof typeof countObject] /
                                     max) *
                                   100
-                                }%`,
+                                  }%`,
                                 height: "2rem",
                               }}
                             ></div>

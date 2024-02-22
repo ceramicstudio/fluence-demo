@@ -7,7 +7,6 @@ import KeyResolver from "key-did-resolver";
 import { type NextApiRequest, type NextApiResponse } from "next";
 import { fromString } from "uint8arrays/from-string";
 import { env } from "../../env.mjs";
-import { definition } from "../../__generated__/definition.js";
 
 const { SECRET_KEY } = env;
 
