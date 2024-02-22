@@ -27,7 +27,6 @@
     "flowbite-react": "^0.7.2",
     "next": "^12.2.4",
     "pg": "8.6.0",
-    "point-demo-ts": "^0.1.5",
     "react": "18.2.0",
     "react-device-detect": "^2.2.3",
     "react-dom": "18.2.0",
