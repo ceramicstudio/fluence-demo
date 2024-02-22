@@ -18,6 +18,7 @@ type ObjectType = {
   DeSciDay: string;
   TalentDaoHackerHouse: string;
   ProofOfData: string;
+  Aspecta: string;
 };
 
 type EventString =
@@ -26,7 +27,8 @@ type EventString =
   | "DePinDay"
   | "DeSciDay"
   | "TalentDaoHackerHouse"
-  | "ProofOfData";
+  | "ProofOfData"
+  | "Aspecta";
 
 interface Event {
   recipient: string;
@@ -48,6 +50,7 @@ const badgeNames = {
   ProofOfData: "Proof of Data",
   AllBadges: "All Badges Threshhold",
   ThreeBadges: "Three Badges Threshhold",
+  Aspecta: "Aspecta",
 };
 
 const imageMapping = {
@@ -59,6 +62,7 @@ const imageMapping = {
   ProofOfData: "/proofdata.png",
   AllBadges: "/all.png",
   ThreeBadges: "/final.png",
+  Aspecta: "/aspecta.png",
 };
 
 export default function Attest() {
@@ -69,6 +73,7 @@ export default function Attest() {
   const [event, setEvent] = useState<EventString>();
   const [code, setCode] = useState<string | undefined>(undefined);
   const [badgeArray, setBadgeArray] = useState<Event[]>([]);
+  const [pointSum, setPointSum] = useState<number>();
   const [userLocation, setUserLocation] = useState<Location>({
     latitude: undefined,
     longitude: undefined,
@@ -132,6 +137,45 @@ export default function Attest() {
     }
   };
 
+  const issuePoint = async (value: number, context: string, refId?: string) => {
+    const result = await fetch("/api/issue", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        address,
+        value,
+        context,
+        chainId,
+        refId: refId ?? "",
+      }),
+    });
+    type returnType = {
+      err?: unknown;
+      id: string;
+      issuer: {
+        id: string;
+      };
+      recipient: {
+        id: string;
+      };
+      data: {
+        value: number;
+        timestamp: string;
+        context: string;
+        refId: string;
+      }[];
+    };
+    const finalPoint = (await result.json()) as returnType;
+    if (finalPoint.err) {
+      alert(finalPoint.err);
+      return;
+    }
+    console.log(finalPoint, 'success issuing point');
+    return finalPoint;
+  }
+
   const createEligibility = async (e: string) => {
     const data = await compose.executeQuery<{
       node: {
@@ -170,7 +214,92 @@ export default function Attest() {
     }
   };
 
+  const getDid = async () => {
+    try {
+      const result = await fetch("/api/checkdid", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      type returnType = {
+        err?: unknown;
+        did: string;
+      };
+      const finalDid = (await result.json()) as returnType;
+      console.log(finalDid);
+      return finalDid.did;
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
+  const getPoints = async () => {
+    try {
+      const did = await getDid();
+      const exists = await compose.executeQuery<{
+        node: {
+          pointAttestationsList: {
+            edges: {
+              node: {
+                id: string;
+                issuer: {
+                  id: string;
+                };
+                recipient: {
+                  id: string;
+                };
+                data: {
+                  value: number;
+                  refId: string;
+                  timestamp: string;
+                  context: string;
+                }[];
+              };
+            }[];
+          };
+        };
+      } | null>(`
+      query CheckPointAttestations {
+        node(id: "${did}") {
+          ... on CeramicAccount {
+                pointAttestationsList(filters: { where: { recipient: { equalTo: "${`did:pkh:eip155:${chainId}:${address}`}" } } }, first: 1) {
+                  edges {
+                    node {
+                        id
+                        data {
+                          value
+                          refId
+                          timestamp
+                          context
+                        }
+                        issuer {
+                            id
+                        }
+                        recipient {
+                            id
+                        }
+                     }
+                  }
+                }
+              }
+            }
+          }
+      `);
+
+      console.log(exists, 'point attestation');
+      if (exists.data?.node.pointAttestationsList.edges.length) {
+        const data = exists.data?.node.pointAttestationsList.edges[0]?.node.data ?? undefined;
+        const sumValues = data?.reduce((acc, curr) => acc + curr.value, 0);
+        setPointSum(sumValues ?? 0);
+      }
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
   const getRecords = async () => {
+    await getPoints();
     const data = await compose.executeQuery<{
       node: {
         ethDenverAttendanceList: {
@@ -210,6 +339,7 @@ export default function Attest() {
       DeSciDay: "",
       TalentDaoHackerHouse: "",
       ProofOfData: "",
+      Aspecta: "",
     };
     if (
       data.data &&
@@ -237,10 +367,10 @@ export default function Attest() {
           if (event.longitude === 0 || event.longitude === null) {
             event.longitude = undefined;
           }
-          console.log(result, event.event);
+          const did = await getDid();
           if (
             didFromJwt ===
-              "did:key:z6MknfS5JdwaTV52StbPjzxZcZftJSkyfLT2oje66aa5Fajm" &&
+            did &&
             result?.payload &&
             result.payload.timestamp === event.timestamp &&
             result.payload.event === event.event &&
@@ -261,14 +391,16 @@ export default function Attest() {
                       ? (sharedObj.TalentDaoHackerHouse = event.id)
                       : event.event === "ProofOfData"
                         ? (sharedObj.ProofOfData = event.id)
-                        : null;
+                        : event.event === "Aspecta"
+                          ? (sharedObj.Aspecta = event.id)
+                          : null;
           }
         } catch (e) {
           console.log(e);
         }
       }
       // console.log(keepTrack.size);
-      if (keepTrack.size === 3 || keepTrack.size === 7) {
+      if (keepTrack.size === 3 || keepTrack.size === 8) {
         console.log(keepTrack);
         console.log("All badges have been collected");
         const itemToPush = await createFinal(sharedObj, keepTrack.size);
@@ -322,7 +454,11 @@ export default function Attest() {
       alert(finalClaim.err);
       return;
     }
-    const data = await compose.executeQuery(`
+    const data = await compose.executeQuery<{
+      createEthDenverAttendance: {
+        document: Event;
+      };
+    }>(`
     mutation{
       createEthDenverAttendance(input: {
         content: {
@@ -347,6 +483,11 @@ export default function Attest() {
       }
     }
   `);
+    //if mutation is a success, issue a point
+    if (data.data?.createEthDenverAttendance?.document) {
+      const point = await issuePoint(10, "Regular Event Attendance", data.data?.createEthDenverAttendance?.document.id);
+      console.log(point);
+    }
     setAttesting(false);
     await getRecords();
     setEligible(false);
@@ -373,7 +514,8 @@ export default function Attest() {
           ? sharedObj.TalentDaoHackerHouse
           : "",
         ProofOfData: sharedObj.ProofOfData ? sharedObj.ProofOfData : "",
-        event: size === 7 ? "AllBadges" : "ThreeBadges",
+        Aspecta: sharedObj.Aspecta ? sharedObj.Aspecta : "",
+        event: size === 8 ? "AllBadges" : "ThreeBadges",
       }),
     });
     type returnType = {
@@ -386,6 +528,7 @@ export default function Attest() {
       DeSciDay: string;
       TalentDaoHackerHouse: string;
       ProofOfData: string;
+      Aspecta: string;
       timestamp: string;
       event: string;
     };
@@ -396,7 +539,7 @@ export default function Attest() {
       alert(finalClaim.err);
       return undefined;
     }
-    const whichEvent = size === 7 ? "AllBadges" : "ThreeBadges";
+    const whichEvent = size === 8 ? "AllBadges" : "ThreeBadges";
     console.log(whichEvent);
 
     const data = await compose.executeQuery<{
@@ -424,6 +567,11 @@ export default function Attest() {
         }
       }
     `);
+    if (data.data?.createEthDenverAttendance?.document) {
+      const point = await issuePoint(25, "Threshhold Badge Received", data.data?.createEthDenverAttendance?.document.id);
+      console.log(point);
+    }
+    await getPoints();
     console.log(data);
     return data.data?.createEthDenverAttendance?.document;
   };
@@ -522,12 +670,17 @@ export default function Attest() {
             </>
           )}
         </form>
-        {badgeArray.length > 0 && (
+        {address && badgeArray.length > 0 && (
           <h2 className="mb-8 mt-6 text-center text-3xl font-semibold text-gray-800">
             Your Badges:
           </h2>
         )}
-        {badgeArray.length === 0 && (
+        {address && pointSum && (
+          <h3 className="mb-8 mt-6 text-center text-1xl font-semibold text-gray-800">
+            Points Earned: {pointSum}
+          </h3>
+        )}
+        {address && badgeArray.length === 0 && (
           <>
             <h2 className="mb-8 mt-6 text-center text-3xl font-semibold text-gray-800">
               No Badges Yet
@@ -536,6 +689,11 @@ export default function Attest() {
               Please scan a Disc to begin claiming badges
             </p>
           </>
+        )}
+        {!address && (
+          <h2 className="mb-8 mt-6 text-center text-3xl font-semibold text-gray-800">
+            Please Connect your Wallet to Begin
+          </h2>
         )}
         <div className="flex-auto flex-row flex-wrap items-center justify-center">
           {badgeArray.length > 0 &&
@@ -564,146 +722,6 @@ export default function Attest() {
                 </div>
               );
             })}
-          {/* {allBadges !== null && (
-            <div className="mt-4 w-auto max-w-full shrink-0">
-              <p className="m-auto text-center font-semibold text-gray-800">
-                3 Event Threshhold Badge
-              </p>
-              <Image
-                src="/all.png"
-                alt="All Badges"
-                width={400}
-                height={400}
-                style={{ margin: "auto" }}
-                onClick={() => {
-                  window.open(
-                    `https://cerscan.com/mainnet/stream/${allBadges.id}`,
-                    "_blank",
-                  );
-                }}
-              />
-            </div>
-          )}
-          {openDataBadge !== null && (
-            <div className="mt-4 w-auto max-w-full shrink-0">
-              <p className="m-auto text-center font-semibold text-gray-800">
-                Open Data Day Badge
-              </p>
-              <Image
-                src="/opendata.png"
-                alt="Open Data Day Badge"
-                width={400}
-                height={400}
-                style={{ margin: "auto" }}
-                onClick={() => {
-                  window.open(
-                    `https://cerscan.com/mainnet/stream/${openDataBadge.id}`,
-                    "_blank",
-                  );
-                }}
-              />
-            </div>
-          )}
-          {dePinBadge !== null && (
-            <div className="mt-4 w-auto max-w-full shrink-0">
-              <p className="m-auto text-center font-semibold text-gray-800">
-                DePin Badge
-              </p>
-              <Image
-                src="/depin.png"
-                alt="DePin Badge"
-                width={400}
-                height={400}
-                style={{ margin: "auto" }}
-                onClick={() => {
-                  window.open(
-                    `https://cerscan.com/mainnet/stream/${dePinBadge.id}`,
-                    "_blank",
-                  );
-                }}
-              />
-            </div>
-          )}
-          {fluenceBadge !== null && (
-            <div className="mt-4 w-auto max-w-full shrink-0">
-              <p className="m-auto text-center font-semibold text-gray-800">
-                Fluence Badge
-              </p>
-              <Image
-                src="/fluence.png"
-                alt="Fluence Badge"
-                width={400}
-                height={400}
-                style={{ margin: "auto" }}
-                onClick={() => {
-                  window.open(
-                    `https://cerscan.com/mainnet/stream/${fluenceBadge.id}`,
-                    "_blank",
-                  );
-                }}
-              />
-            </div>
-          )}
-          {deSciBadge !== null && (
-            <div className="mt-4 w-auto max-w-full shrink-0">
-              <p className="m-auto text-center font-semibold text-gray-800">
-                DeSci Badge
-              </p>
-              <Image
-                src="/desci.png"
-                alt="DeSci Badge"
-                width={400}
-                height={400}
-                style={{ margin: "auto" }}
-                onClick={() => {
-                  window.open(
-                    `https://cerscan.com/mainnet/stream/${deSciBadge.id}`,
-                    "_blank",
-                  );
-                }}
-              />
-            </div>
-          )}
-          {talentBadge !== null && (
-            <div className="mt-4 w-auto max-w-full shrink-0">
-              <p className="m-auto text-center font-semibold text-gray-800">
-                TalentDao Hacker House Badge
-              </p>
-              <Image
-                src="/talentdao.png"
-                alt="TalentDao Hacker House Badge"
-                width={400}
-                height={400}
-                style={{ margin: "auto" }}
-                onClick={() => {
-                  window.open(
-                    `https://cerscan.com/mainnet/stream/${talentBadge.id}`,
-                    "_blank",
-                  );
-                }}
-              />
-            </div>
-          )}
-          {proofBadge !== null && (
-            <div className="mt-4 w-auto max-w-full shrink-0">
-              <p className="m-auto text-center font-semibold text-gray-800">
-                Proof of Data Badge
-              </p>
-              <Image
-                src="/proofdata.png"
-                alt="Proof of Data Badge"
-                width={400}
-                height={400}
-                style={{ margin: "auto" }}
-                onClick={() => {
-                  window.open(
-                    `https://cerscan.com/mainnet/stream/${proofBadge.id}`,
-                    "_blank",
-                  );
-                }}
-              />
-            </div>
-          )} */}
         </div>
       </div>
     </div>

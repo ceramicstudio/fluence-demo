@@ -1,0 +1,13 @@
+type PointAttestation
+  @createModel(accountRelation: LIST, description: "A point attestation") {
+  issuer: DID! @documentAccount
+  recipient: DID! @accountReference
+  data: [Data!]! @list(maxLength: 100000)
+}
+
+type Data {
+  value: Int!
+  timestamp: DateTime!
+  context: String @string(maxLength: 1000000)
+  refId: StreamID
+}

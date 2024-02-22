@@ -44,6 +44,7 @@ export default async function createCredential(
       "DeSciDay",
       "OpenDataDay",
       "TalentDaoHackerHouse",
+      "Aspecta",
     ];
     for (const event of events) {
       const item = await client.query(

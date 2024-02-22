@@ -1,0 +1,16 @@
+type PointAttestation @loadModel(id: "$ATTESTATION_ID") {
+  id: ID!
+}
+
+type PointMaterialization @createModel(
+    accountRelation: LIST
+    description: "A point materialization model"
+  )
+{
+  issuer: DID! @documentAccount
+  recipient: DID! @accountReference
+  context: String @string(maxLength: 1000000)
+  value: Int!
+  pointAttestationId: StreamID! @documentReference(model: "PointAttestation")
+  pointAttestation: PointAttestation! @relationDocument(property: "pointAttestationId")
+}

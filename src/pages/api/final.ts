@@ -19,6 +19,7 @@ export default async function createCredential(
     DeSciDay: string;
     OpenDataDay: string;
     TalentDaoHackerHouse: string;
+    Aspecta: string;
     event: string;
   }
 
@@ -30,6 +31,7 @@ export default async function createCredential(
     DeSciDay,
     OpenDataDay,
     TalentDaoHackerHouse,
+    Aspecta,
     event,
   }: RequestBody = req.body as RequestBody;
 
@@ -52,6 +54,7 @@ export default async function createCredential(
       DeSciDay: string;
       OpenDataDay: string;
       TalentDaoHackerHouse: string;
+      Aspecta: string;
       timestamp: string;
       event: string;
     } = {
@@ -62,6 +65,7 @@ export default async function createCredential(
       DeSciDay,
       OpenDataDay,
       TalentDaoHackerHouse,
+      Aspecta,
       timestamp: new Date().toISOString(),
       event,
     };

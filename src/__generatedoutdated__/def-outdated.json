@@ -1,0 +1,59 @@
+{
+    "version": "1.1",
+    "models": {
+      "kjzl6hvfrbw6c798up51keuer1v1ig8na82srjwob1bmzq4fpqa15r7pnsllsim": [
+        {
+          "jws": {
+            "payload": "AXESIFrQlt4N7GkyHO9yRMW4gtnQod-AsG1mzk2jeO1CsGem",
+            "signatures": [
+              {
+                "signature": "RXGvpmatMFAMevEGP90iUV9hYcQGXCYxY6pqQMFrrSZbGu4ROOuVV3myNrTf0-2dIKCjwIOgIJ98vIr6wEy2CA",
+                "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa2sxVGF1V0R1QVkyM01CZHUzc2tUSDhMR0xncmlzQ1VUSHlKeXlMSnFId2JYI3o2TWtrMVRhdVdEdUFZMjNNQmR1M3NrVEg4TEdMZ3Jpc0NVVEh5Snl5TEpxSHdiWCJ9"
+              }
+            ],
+            "link": "bafyreic22cln4dpmnezbz33sitc3rawz2cq57afqnvtm4tndpdwufmdhuy"
+          },
+          "linkedBlock": "omRkYXRhqWRuYW1lc0V0aERlbnZlckF0dGVuZGFuY2Vldmlld3OhamNvbnRyb2xsZXKhZHR5cGVvZG9jdW1lbnRBY2NvdW50ZnNjaGVtYaZkdHlwZWZvYmplY3RlJGRlZnOhb0dyYXBoUUxEYXRlVGltZaRkdHlwZWZzdHJpbmdldGl0bGVvR3JhcGhRTERhdGVUaW1lZmZvcm1hdGlkYXRlLXRpbWVpbWF4TGVuZ3RoGGRnJHNjaGVtYXgsaHR0cHM6Ly9qc29uLXNjaGVtYS5vcmcvZHJhZnQvMjAyMC0xMi9zY2hlbWFocmVxdWlyZWSEaXJlY2lwaWVudGVldmVudGl0aW1lc3RhbXBjand0anByb3BlcnRpZXOmY2p3dKJkdHlwZWZzdHJpbmdpbWF4TGVuZ3RoGgABhqBlZXZlbnSiZHR5cGVmc3RyaW5naW1heExlbmd0aBhkaGxhdGl0dWRloWR0eXBlZm51bWJlcmlsb25naXR1ZGWhZHR5cGVmbnVtYmVyaXJlY2lwaWVudKNkdHlwZWZzdHJpbmdpbWF4TGVuZ3RoGCppbWluTGVuZ3RoGCppdGltZXN0YW1woWQkcmVmdyMvJGRlZnMvR3JhcGhRTERhdGVUaW1ldGFkZGl0aW9uYWxQcm9wZXJ0aWVz9Gd2ZXJzaW9uYzIuMGlpbnRlcmZhY2X0aXJlbGF0aW9uc6BqaW1wbGVtZW50c4BrZGVzY3JpcHRpb254KUFuIGF0dGVuZGFuY2UgY2xhaW0gYXQgYW4gRXRoRGVudmVyIGV2ZW50b2FjY291bnRSZWxhdGlvbqFkdHlwZWRsaXN0ZmhlYWRlcqNjc2VwZW1vZGVsZW1vZGVsUs4BBAFxcQsACWhtb2RlbC12MWtjb250cm9sbGVyc4F4OGRpZDprZXk6ejZNa2sxVGF1V0R1QVkyM01CZHUzc2tUSDhMR0xncmlzQ1VUSHlKeXlMSnFId2JY"
+        }
+      ],
+      "kjzl6hvfrbw6c8oa01h8jdjkzx2sgzx1404z550cfrnh9fehxn1c5iw5fnfvbqa": [
+        {
+          "jws": {
+            "payload": "AXESICXWLnDVvgjwiZZB1TxIjcHIj1YnpxCLJd6CRs9tFvWc",
+            "signatures": [
+              {
+                "signature": "ZhxKRi1vSsDfiJ29KZFIG7de0sDzwXXDqkj7VmCWzPuAAod6NwUIvb3-7kcfRrQZsnpmDWc-ZOdpoXaxaAlOBQ",
+                "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa2sxVGF1V0R1QVkyM01CZHUzc2tUSDhMR0xncmlzQ1VUSHlKeXlMSnFId2JYI3o2TWtrMVRhdVdEdUFZMjNNQmR1M3NrVEg4TEdMZ3Jpc0NVVEh5Snl5TEpxSHdiWCJ9"
+              }
+            ],
+            "link": "bafyreibf2yxhbvn6bdyitfsb2u6erdobzchvmj5hccfslxuci3hw2fxvtq"
+          },
+          "linkedBlock": "omRkYXRhqWRuYW1lcFBvaW50QXR0ZXN0YXRpb25ldmlld3OhZmlzc3VlcqFkdHlwZW9kb2N1bWVudEFjY291bnRmc2NoZW1hpmR0eXBlZm9iamVjdGUkZGVmc6RkRGF0YaVkdHlwZWZvYmplY3RldGl0bGVkRGF0YWhyZXF1aXJlZIJldmFsdWVpdGltZXN0YW1wanByb3BlcnRpZXOkZXJlZklkoWQkcmVmdyMvJGRlZnMvQ2VyYW1pY1N0cmVhbUlEZXZhbHVloWR0eXBlZ2ludGVnZXJnY29udGV4dKJkdHlwZWZzdHJpbmdpbWF4TGVuZ3RoGgAPQkBpdGltZXN0YW1woWQkcmVmdyMvJGRlZnMvR3JhcGhRTERhdGVUaW1ldGFkZGl0aW9uYWxQcm9wZXJ0aWVz9GpHcmFwaFFMRElEpGR0eXBlZnN0cmluZ2V0aXRsZWpHcmFwaFFMRElEZ3BhdHRlcm54j15kaWQ6W2EtekEtWjAtOS4hIyQlJicqK1wvPT9eX2B7fH1+LV0rOlthLXpBLVowLTkuISMkJSYnKitcLz0/Xl9ge3x9fi1dKjo/W2EtekEtWjAtOS4hIyQlJicqK1wvPT9eX2B7fH1+LV0qOj9bYS16QS1aMC05LiEjJCUmJyorXC89P15fYHt8fX4tXSokaW1heExlbmd0aBhkb0NlcmFtaWNTdHJlYW1JRKNkdHlwZWZzdHJpbmdldGl0bGVvQ2VyYW1pY1N0cmVhbUlEaW1heExlbmd0aBhkb0dyYXBoUUxEYXRlVGltZaRkdHlwZWZzdHJpbmdldGl0bGVvR3JhcGhRTERhdGVUaW1lZmZvcm1hdGlkYXRlLXRpbWVpbWF4TGVuZ3RoGGRnJHNjaGVtYXgsaHR0cHM6Ly9qc29uLXNjaGVtYS5vcmcvZHJhZnQvMjAyMC0xMi9zY2hlbWFocmVxdWlyZWSCaXJlY2lwaWVudGRkYXRhanByb3BlcnRpZXOiZGRhdGGjZHR5cGVlYXJyYXllaXRlbXOhZCRyZWZsIy8kZGVmcy9EYXRhaG1heEl0ZW1zGgABhqBpcmVjaXBpZW50oWQkcmVmciMvJGRlZnMvR3JhcGhRTERJRHRhZGRpdGlvbmFsUHJvcGVydGllc/RndmVyc2lvbmMyLjBpaW50ZXJmYWNl9GlyZWxhdGlvbnOhaXJlY2lwaWVudKFkdHlwZWdhY2NvdW50amltcGxlbWVudHOAa2Rlc2NyaXB0aW9uc0EgcG9pbnQgYXR0ZXN0YXRpb25vYWNjb3VudFJlbGF0aW9uoWR0eXBlZGxpc3RmaGVhZGVyo2NzZXBlbW9kZWxlbW9kZWxSzgEEAXFxCwAJaG1vZGVsLXYxa2NvbnRyb2xsZXJzgXg4ZGlkOmtleTp6Nk1razFUYXVXRHVBWTIzTUJkdTNza1RIOExHTGdyaXNDVVRIeUp5eUxKcUh3Ylg="
+        }
+      ]
+    },
+    "indices": {
+      "kjzl6hvfrbw6c798up51keuer1v1ig8na82srjwob1bmzq4fpqa15r7pnsllsim": [
+        { "fields": [{ "path": ["recipient"] }] },
+        { "fields": [{ "path": ["event"] }] },
+        { "fields": [{ "path": ["latitude"] }] },
+        { "fields": [{ "path": ["longitude"] }] },
+        { "fields": [{ "path": ["timestamp"] }] }
+      ],
+      "kjzl6hvfrbw6c8oa01h8jdjkzx2sgzx1404z550cfrnh9fehxn1c5iw5fnfvbqa": []
+    },
+    "aliases": {
+      "kjzl6hvfrbw6c798up51keuer1v1ig8na82srjwob1bmzq4fpqa15r7pnsllsim": "EthDenverAttendance",
+      "kjzl6hvfrbw6c8oa01h8jdjkzx2sgzx1404z550cfrnh9fehxn1c5iw5fnfvbqa": "PointAttestation"
+    },
+    "views": {
+      "account": {},
+      "root": {},
+      "models": {
+        "kjzl6hvfrbw6c798up51keuer1v1ig8na82srjwob1bmzq4fpqa15r7pnsllsim": {},
+        "kjzl6hvfrbw6c8oa01h8jdjkzx2sgzx1404z550cfrnh9fehxn1c5iw5fnfvbqa": {}
+      }
+    },
+    "commonEmbeds": ["Data"]
+  }
+  

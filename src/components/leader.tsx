@@ -12,7 +12,8 @@ type EventString =
   | "DePinDay"
   | "DeSciDay"
   | "TalentDaoHackerHouse"
-  | "ProofOfData";
+  | "ProofOfData"
+  | "Aspecta";
 
 interface Event {
   recipient: string;
@@ -32,6 +33,7 @@ const badgeNames = {
   DeSciDay: "DeSci Day",
   TalentDaoHackerHouse: "TalentDao Hacker House",
   ProofOfData: "Proof of Data",
+  Aspecta: "Aspecta",
   ThreeBadges: "Three Badges Threshhold",
   AllBadges: "All Badges Threshhold",
 };
@@ -43,6 +45,7 @@ const countObject = {
   DeSciDay: 0,
   TalentDaoHackerHouse: 0,
   ProofOfData: 0,
+  Aspecta: 0,
   ThreeBadges: 0,
   AllBadges: 0,
 };
@@ -54,6 +57,7 @@ const imageMapping = {
   DeSciDay: "/desci.png",
   TalentDaoHackerHouse: "/talentdao.png",
   ProofOfData: "/proofdata.png",
+  Aspecta: "/aspecta.png",
   AllBadges: "/all.png",
   ThreeBadges: "/final.png",
 };

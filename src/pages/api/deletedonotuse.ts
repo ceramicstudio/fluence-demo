@@ -19,7 +19,7 @@
 //     connectionString: STRING,
 //   });
 
-//   await pool.query("SELECT NOW()");
+//   const poolq = await pool.query("SELECT NOW()");
 //   await pool.end();
 
 //   const client = new Client({
@@ -28,17 +28,11 @@
 
 //   try {
 //     await client.connect();
-//     const checkIfUsed = await client.query(
-//       `UPDATE is_used SET used=false WHERE used=true`,
-//     );
-//     //count all used codes
-//     const check = await client.query(
-//       `SELECT * FROM is_used WHERE used=false`,
-//     );
+//     const dropString = `DROP TABLE is_used`;
+//     const result = await client.query(dropString);
 //     await client.end();
 //     return res.json({
-//       success: "All codes are now available",
-//       unusedCodes: check.rows.length,
+//       result
 //     });
 //   } catch (err) {
 //     res.json({

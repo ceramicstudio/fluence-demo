@@ -19,14 +19,14 @@ type ComposeDBProps = {
   children: ReactNode;
 };
 
-const CERAMIC_URL = process.env.URL ?? " https://ceramic-demo.hirenodes.io";
+const CERAMIC_URL = process.env.URL ?? "https://ceramic-demo.hirenodes.io";
 
 /**
  * Configure ceramic Client & create context.
  */
 const ceramic = new CeramicClient(CERAMIC_URL);
 
-const compose = new ComposeClient({
+export const compose = new ComposeClient({
   ceramic,
   definition: definition as RuntimeCompositeDefinition,
 });

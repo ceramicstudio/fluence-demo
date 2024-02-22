@@ -46,6 +46,14 @@ export default function Home() {
             </span> */}
           </h1>
         )}
+        {!loggedIn && (
+          <div className="flex min-h-screen min-w-full flex-col items-center justify-start gap-6 px-4 py-8 sm:py-16 md:py-24">
+          <h2 className="mb-8 mt-6 text-center text-3xl font-semibold text-white margin-auto">
+            Please Connect your Wallet to Begin
+          </h2>
+          </div>
+        )
+        }
         <div className="flex min-h-screen min-w-full flex-col items-center justify-start">
           {loggedIn && <Attest />}
           {loggedIn && <Modal />}
