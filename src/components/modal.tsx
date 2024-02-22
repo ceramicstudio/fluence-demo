@@ -4,6 +4,7 @@ import { useAccount } from "wagmi";
 export default function Modal() {
   const [showModal, setShowModal] = useState(false);
   const [email, setEmail] = useState("");
+  const [checked, setChecked] = useState(false);
   const { address } = useAccount();
 
   const checkEmail = async () => {
@@ -32,6 +33,9 @@ export default function Modal() {
   };
 
   const submitEmail = async () => {
+    if (!checked || !email || !address) {
+      return;
+    }
     const result = await fetch("/api/email", {
       method: "POST",
       headers: {
@@ -75,7 +79,7 @@ export default function Modal() {
                 {/*header*/}
                 <div className="border-blueGray-200 flex items-start justify-between rounded-t border-b border-solid p-5">
                   <h3 className="text-2xl font-semibold">
-                    Enter an Email for Prizes
+                    Enter an email for prizes
                   </h3>
                   <button
                     className="float-right ml-auto border-0 bg-transparent p-1 text-3xl font-semibold leading-none text-black opacity-5 outline-none focus:outline-none"
@@ -85,12 +89,19 @@ export default function Modal() {
                 {/*body*/}
                 <div className="relative flex-auto p-6">
                   <p className="text-blueGray-500 my-4 text-lg leading-relaxed">
-                    We do not have an email address on file associated with your
-                    account. You are free to participate in this scavenger hunt,
-                    but you will not be eligible for prizes without an email
-                    address.
+                  In order to be eligible for prizes, you must enter your email address below so that we can contact you.  You can participate in this scavenger hunt without submitting an email address, but you will not be eligible for prizes.
                   </p>
-
+                  <div className="flex items-center justify-start">
+                    <input type="checkbox" 
+                    className="m-3" 
+                    onChange={(e) => {
+                      setChecked(e.target.checked)
+                    }}
+                    />
+                    <p className="text-blueGray-500 my-4 text-m leading-relaxed">
+                    I agree to receive communications from 3Box Labs.
+                    </p>
+                  </div>
                   <p className="text-blueGray-500 my-4 text-lg leading-relaxed">
                     Please enter your email address below.
                   </p>
@@ -119,7 +130,7 @@ export default function Modal() {
                       void submitEmail();
                     }}
                   >
-                    Save Changes
+                    Submit
                   </button>
                 </div>
               </div>
