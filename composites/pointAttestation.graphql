@@ -1,5 +1,7 @@
-type PointAttestation
-  @createModel(accountRelation: LIST, description: "A point attestation") {
+type PointAttestations
+  @createModel(accountRelation: LIST, description: "A point attestation") 
+  @createIndex(fields: [{ path: ["recipient"] }])
+  {
   issuer: DID! @documentAccount
   recipient: DID! @accountReference
   data: [Data!]! @list(maxLength: 100000)
