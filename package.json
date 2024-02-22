@@ -25,7 +25,7 @@
     "did-session": "^3.0.2",
     "dids": "^3.2.0",
     "flowbite-react": "^0.7.2",
-    "next": "^12.2.4",
+    "next": "^13.5.1",
     "pg": "8.6.0",
     "point-demo-ts": "^0.1.5",
     "react": "18.2.0",
