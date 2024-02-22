@@ -211,6 +211,9 @@ export default function Attest() {
       data.data.node.ethDenverAttendanceList.edges.length === 0
     ) {
       setEligible(true);
+    } else {
+      alert("You have already claimed this badge");
+      localStorage.removeItem("code");
     }
   };
 
