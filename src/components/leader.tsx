@@ -66,7 +66,7 @@ export default function Leader() {
   const [count, setCount] = useState<typeof countObject>(countObject);
   const { compose } = useComposeDB();
   const [max, setMax] = useState<number>(0);
-  const [participantCount, setParticipantCount] = useState<number>(0);
+  const [participantCount, setParticipantCount] = useState<number | string>(0);
   const { address } = useAccount();
   const chainId = useChainId();
 
@@ -194,13 +194,13 @@ export default function Leader() {
       const participantCount = unique.reduce((acc, [address, event]) => {
         return acc.add(address);
       }, new Set<string>()).size;
-      console.log(countObj);
+      console.log(participantCount);
       const arr = Object.keys(countObj).map(function (key) {
         return countObj[key as keyof typeof countObj];
       });
       const maximum = Math.max(...arr);
       setMax(maximum);
-      setParticipantCount(participantCount);
+      setParticipantCount(participantCount > 0 ? participantCount : "none");
       setCount(countObj);
     }
   };
@@ -243,7 +243,7 @@ export default function Leader() {
                               className="h-1 w-full rounded-md border-2 bg-slate-300"
                               style={{
                                 width: `${(count[badge as keyof typeof countObject] /
-                                    max) *
+                                  max) *
                                   100
                                   }%`,
                                 height: "2rem",
@@ -269,7 +269,7 @@ export default function Leader() {
                             ></div>
                           </div>
                           <p className="text-center text-gray-800">
-                            0 / {participantCount} Participants have Claimed
+                            0 Participants have Claimed
                           </p>
                         </div>
                       </div>
@@ -278,12 +278,76 @@ export default function Leader() {
                 </>
               );
             })
-          ) : (
-            <div className="m-auto flex w-full flex-col items-center justify-center">
-              <DNA height={100} width={100} />
-              <p className="text-center text-gray-800">Loading Event Data...</p>
-            </div>
-          )}
+          ) : participantCount === "none" ?
+            (
+              Object.keys(badgeNames).map((badge, index) => {
+                return (
+                  <>
+                    <div
+                      className="m-2 mt-4 min-h-48 w-auto max-w-full shrink-0  bg-gray-900 shadow-lg shadow-rose-600/40"
+                      key={badge}
+                    >
+                      <div className="flex w-20 flex-col content-start items-start justify-evenly">
+                        <p className="m-auto text-center font-semibold text-orange-500">
+                          {badgeNames[badge as keyof typeof badgeNames]}
+                        </p>
+                        <Image
+                          src={imageMapping[badge as keyof typeof imageMapping]}
+                          alt={badge}
+                          width={80}
+                          height={80}
+                        />
+                      </div>
+                      {count[badge as keyof typeof countObject] ? (
+                        <div className="mt-7 flex w-full flex-row items-center justify-start">
+                          <div className="flex w-full flex-col items-center justify-start">
+                            <div className="flex w-full flex-row items-center justify-start">
+                              <div
+                                className="h-1 w-full rounded-md border-2 bg-slate-300"
+                                style={{
+                                  width: `${(count[badge as keyof typeof countObject] /
+                                    max) *
+                                    100
+                                    }%`,
+                                  height: "2rem",
+                                }}
+                              ></div>
+                            </div>
+                            <p className="text-center text-slate-200">
+                              {count[badge as keyof typeof countObject]} /{" "}
+                              {participantCount} Participants have Claimed
+                            </p>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="mt-7 flex w-full flex-row items-center justify-start">
+                          <div className="flex w-full flex-col items-center justify-start">
+                            <div className="flex w-full flex-row items-center justify-start">
+                              <div
+                                className="h-1 w-full rounded-md border-2"
+                                style={{
+                                  width: `100%`,
+                                  height: "2rem",
+                                }}
+                              ></div>
+                            </div>
+                            <p className="text-center text-slate-200">
+                              0 Participants have Claimed
+                            </p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </>
+                );
+              })
+            ) :
+            (
+              <div className="m-auto flex w-full flex-col items-center justify-center">
+                <DNA height={100} width={100} />
+                <p className="text-center text-slate-200">Loading Event Data...</p>
+              </div>
+            )}
         </div>
       </div>
     </div>
