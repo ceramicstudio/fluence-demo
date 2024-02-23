@@ -32,6 +32,9 @@ export default function Home() {
         <meta name="description" content="Discover where to find us at EthDenver &apos;24" />
         <link rel="icon" href="/favicon.ico" />
         <meta property="og:image" content="/og.png" />
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content="Events | EthDenver '24 Scavenger Hunt" />
+        <meta property="og:description" content="Discover where to find us at EthDenver '24." />
         <meta name="twitter:image" content="/og.png" />
       </Head>
       <Navbar />

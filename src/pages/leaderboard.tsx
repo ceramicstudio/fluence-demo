@@ -30,10 +30,13 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title>Leaderboard | EthDenver24 Scavenger Hunt</title>
-        <meta name="description" content="Leaderboard for the EthDenver24 Scavenger Hunt" />
+        <title>Leaderboard | EthDenver &apos;24 Scavenger Hunt</title>
+        <meta name="description" content="Leaderboard for the EthDenver '24 Scavenger Hunt" />
         <link rel="icon" href="/favicon.ico" />
         <meta property="og:image" content="/og.png" />
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content="Leaderboard | EthDenver '24 Scavenger Hunt" />
+        <meta property="og:description" content="Leaderboard for the EthDenver '24 Scavenger Hunt." />
         <meta name="twitter:image" content="/og.png" />
       </Head>
       <Navbar />

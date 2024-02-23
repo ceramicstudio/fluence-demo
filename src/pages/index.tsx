@@ -34,6 +34,9 @@ export default function Home() {
         <meta name="description" content="Join the EthDenver &apos;24 Scavenger Hunt, presented by Ceramic and Fluence." />
         <link rel="icon" href="/favicon.ico" />
         <meta property="og:image" content="/og.png" />
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content="EthDenver '24 Scavenger Hunt" />
+        <meta property="og:description" content="Join the EthDenver '24 Scavenger Hunt, presented by Ceramic and Fluence." />
         <meta name="twitter:image" content="/og.png" />
       </Head>
       <Navbar />
