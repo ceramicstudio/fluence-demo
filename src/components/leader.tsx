@@ -189,7 +189,16 @@ export default function Leader() {
         },
         {} as typeof countObject,
       );
-
+      //multiply each event count by the number of participants who have completed that event by iterating over object
+      for (const [key, value] of Object.entries(countObj)) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        if(key !== "AllBadges" && key !== "ThreeBadges") {
+          countObj[key as keyof typeof countObj] = value * 10;
+        } else {
+          countObj[key as keyof typeof countObj] = value * 25;
+        }
+      }
+      
       //count the total number of unique participants based on the unique list
       const participantCount = unique.reduce((acc, [address, event]) => {
         return acc.add(address);
@@ -221,38 +230,27 @@ export default function Leader() {
               return (
                 <>
                   <div
-                    className="m-2 mt-4 min-h-48 w-auto max-w-full shrink-0  bg-gray-900 shadow-lg shadow-rose-600/40"
+                    className="m-2 mt-4 min-h-48 w-auto max-w-full shrink-0  bg-gray-900 shadow-lg shadow-rose-600/40 p-4"
                     key={badge}
                   >
-                    <div className="flex w-20 flex-col content-start items-start justify-evenly">
+                    <div className="flex flex-col items-center justify-evenly">
                       <p className="m-auto text-center font-semibold text-orange-500">
                         {badgeNames[badge as keyof typeof badgeNames]}
                       </p>
                       <Image
                         src={imageMapping[badge as keyof typeof imageMapping]}
                         alt={badge}
-                        width={80}
-                        height={80}
+                        width={150}
+                        height={150}
                       />
                     </div>
                     {count[badge as keyof typeof countObject] ? (
                       <div className="mt-7 flex w-full flex-row items-center justify-start">
                         <div className="flex w-full flex-col items-center justify-start">
                           <div className="flex w-full flex-row items-center justify-start">
-                            <div
-                              className="h-1 w-full rounded-md border-2 bg-slate-300"
-                              style={{
-                                width: `${(count[badge as keyof typeof countObject] /
-                                  max) *
-                                  100
-                                  }%`,
-                                height: "2rem",
-                              }}
-                            ></div>
                           </div>
                           <p className="text-center text-slate-200">
-                            {count[badge as keyof typeof countObject]} /{" "}
-                            {participantCount} Participants have Claimed
+                            {count[badge as keyof typeof countObject]} Points Claimed
                           </p>
                         </div>
                       </div>
@@ -260,16 +258,9 @@ export default function Leader() {
                       <div className="mt-7 flex w-full flex-row items-center justify-start">
                         <div className="flex w-full flex-col items-center justify-start">
                           <div className="flex w-full flex-row items-center justify-start">
-                            <div
-                              className="h-1 w-full rounded-md border-2"
-                              style={{
-                                width: `100%`,
-                                height: "2rem",
-                              }}
-                            ></div>
                           </div>
                           <p className="text-center text-gray-800">
-                            0 Participants have Claimed
+                            0 Points Claimed
                           </p>
                         </div>
                       </div>
@@ -278,76 +269,59 @@ export default function Leader() {
                 </>
               );
             })
-          ) : participantCount === "none" ?
-            (
-              Object.keys(badgeNames).map((badge, index) => {
-                return (
-                  <>
-                    <div
-                      className="m-2 mt-4 min-h-48 w-auto max-w-full shrink-0  bg-gray-900 shadow-lg shadow-rose-600/40"
-                      key={badge}
-                    >
-                      <div className="flex w-20 flex-col content-start items-start justify-evenly">
-                        <p className="m-auto text-center font-semibold text-orange-500">
-                          {badgeNames[badge as keyof typeof badgeNames]}
-                        </p>
-                        <Image
-                          src={imageMapping[badge as keyof typeof imageMapping]}
-                          alt={badge}
-                          width={80}
-                          height={80}
-                        />
-                      </div>
-                      {count[badge as keyof typeof countObject] ? (
-                        <div className="mt-7 flex w-full flex-row items-center justify-start">
-                          <div className="flex w-full flex-col items-center justify-start">
-                            <div className="flex w-full flex-row items-center justify-start">
-                              <div
-                                className="h-1 w-full rounded-md border-2 bg-slate-300"
-                                style={{
-                                  width: `${(count[badge as keyof typeof countObject] /
-                                    max) *
-                                    100
-                                    }%`,
-                                  height: "2rem",
-                                }}
-                              ></div>
-                            </div>
-                            <p className="text-center text-slate-200">
-                              {count[badge as keyof typeof countObject]} /{" "}
-                              {participantCount} Participants have Claimed
-                            </p>
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="mt-7 flex w-full flex-row items-center justify-start">
-                          <div className="flex w-full flex-col items-center justify-start">
-                            <div className="flex w-full flex-row items-center justify-start">
-                              <div
-                                className="h-1 w-full rounded-md border-2"
-                                style={{
-                                  width: `100%`,
-                                  height: "2rem",
-                                }}
-                              ></div>
-                            </div>
-                            <p className="text-center text-slate-200">
-                              0 Participants have Claimed
-                            </p>
-                          </div>
-                        </div>
-                      )}
+          ) : participantCount === "none" ? 
+          (
+            Object.keys(badgeNames).map((badge, index) => {
+              return (
+                <>
+                  <div
+                    className="m-2 mt-4 min-h-48 w-auto max-w-full shrink-0  bg-gray-900 shadow-lg shadow-rose-600/40 p-4"
+                    key={badge}
+                  >
+                    <div className="flex flex-col items-center justify-evenly">
+                      <p className="m-auto text-center font-semibold text-orange-500">
+                        {badgeNames[badge as keyof typeof badgeNames]}
+                      </p>
+                      <Image
+                        src={imageMapping[badge as keyof typeof imageMapping]}
+                        alt={badge}
+                        width={150}
+                        height={150}
+                      />
                     </div>
-                  </>
-                );
-              })
-            ) :
-            (
-              <div className="m-auto flex w-full flex-col items-center justify-center">
-                <DNA height={100} width={100} />
-                <p className="text-center text-slate-200">Loading Event Data...</p>
-              </div>
-            )}
+                    {count[badge as keyof typeof countObject] ? (
+                      <div className="mt-7 flex w-full flex-row items-center justify-start">
+                        <div className="flex w-full flex-col items-center justify-start">
+                          <div className="flex w-full flex-row items-center justify-start">
+                          </div>
+                          <p className="text-center text-slate-200">
+                            {count[badge as keyof typeof countObject]} Points Claimed
+                          </p>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="mt-7 flex w-full flex-row items-center justify-start">
+                        <div className="flex w-full flex-col items-center justify-start">
+                          <div className="flex w-full flex-row items-center justify-start">
+                          </div>
+                          <p className="text-center text-slate-200">
+                           0 Points Claimed
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </>
+              );
+            })
+          ) :
+          
+          (
+            <div className="m-auto flex w-full flex-col items-center justify-center">
+              <DNA height={100} width={100} />
+              <p className="text-center text-slate-200">Loading Event Data...</p>
+            </div>
+          )}
         </div>
       </div>
     </div>
