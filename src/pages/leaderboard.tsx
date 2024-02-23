@@ -47,7 +47,7 @@ export default function Home() {
           </h1>
         )}
         <div className="flex min-h-screen min-w-full flex-col items-center justify-start">
-          {loggedIn && <Leader />}
+           <Leader />
           {loggedIn && <Modal />}
         </div>
       </div>

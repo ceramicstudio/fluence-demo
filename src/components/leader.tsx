@@ -35,7 +35,7 @@ const badgeNames = {
   ProofOfData: "Proof of Data",
   AllBadges: "All Badges Threshhold",
   ThreeBadges: "Three Badges Threshhold",
-  Aspecta: "Builders Day EthDenver Edition by Polyhedra & Aspecta",
+  Aspecta: "Builders Day (Aspecta)",
 };
 
 const countObject = {
