@@ -212,7 +212,7 @@ export default function Leader() {
   return (
     <div className="flex min-h-screen min-w-full flex-col items-center justify-start gap-6 px-4 py-8 sm:py-16 md:py-24">
       <div
-        className="ring-black-600 w-full rounded-md bg-slate-300 p-6 shadow-xl shadow-rose-600/40 ring-2"
+        className="ring-black-600 w-full rounded-md bg-gray-900 p-6 shadow-xl shadow-rose-600/40"
         style={{ height: "fit-content", minHeight: "35rem" }}
       >
         <div className="justify-left flex-auto flex-row flex-wrap items-center">
@@ -221,11 +221,11 @@ export default function Leader() {
               return (
                 <>
                   <div
-                    className="m-2 mt-4 min-h-48 w-auto max-w-full shrink-0  rounded-md border-2 bg-white p-5 shadow-lg"
+                    className="m-2 mt-4 min-h-48 w-auto max-w-full shrink-0  bg-gray-900 shadow-lg shadow-rose-600/40"
                     key={badge}
                   >
                     <div className="flex w-20 flex-col content-start items-start justify-evenly">
-                      <p className="m-auto text-center font-semibold text-gray-800">
+                      <p className="m-auto text-center font-semibold text-orange-500">
                         {badgeNames[badge as keyof typeof badgeNames]}
                       </p>
                       <Image
@@ -250,7 +250,7 @@ export default function Leader() {
                               }}
                             ></div>
                           </div>
-                          <p className="text-center text-gray-800">
+                          <p className="text-center text-slate-200">
                             {count[badge as keyof typeof countObject]} /{" "}
                             {participantCount} Participants have Claimed
                           </p>
