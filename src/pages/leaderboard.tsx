@@ -33,6 +33,8 @@ export default function Home() {
         <title>Leaderboard | EthDenver24 Scavenger Hunt</title>
         <meta name="description" content="Leaderboard for the EthDenver24 Scavenger Hunt" />
         <link rel="icon" href="/favicon.ico" />
+        <meta property="og:image" content="/og.png" />
+        <meta name="twitter:image" content="/og.png" />
       </Head>
       <Navbar />
 
