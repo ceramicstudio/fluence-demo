@@ -7,7 +7,7 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ["var(--font-sans)", ...fontFamily.sans],
+        sans: ['"system-ui"', 'sans-serif']
       },
       backgroundImage: {
         'hero': "url('/bg.png')",

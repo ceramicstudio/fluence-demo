@@ -5,6 +5,7 @@ import { useComposeDB } from "@/fragments";
 import { DNA } from "react-loader-spinner";
 import { DID, type DagJWS } from "dids";
 import KeyResolver from "key-did-resolver";
+import { set } from "zod";
 
 type Location = {
   latitude: number | undefined;
@@ -44,13 +45,13 @@ interface Event {
 const badgeNames = {
   OpenDataDay: "Open Data Day",
   FluenceBooth: "Fluence Booth",
-  DePinDay: "DePin Day",
-  DeSciDay: "DeSci Day",
-  TalentDaoHackerHouse: "TalentDao Hacker House",
+  DePinDay: "DePIN Day",
+  DeSciDay: "SciOS24",
+  TalentDaoHackerHouse: "Silk Hacker House",
   ProofOfData: "Proof of Data",
   AllBadges: "All Badges Threshhold",
   ThreeBadges: "Three Badges Threshhold",
-  Aspecta: "Aspecta",
+  Aspecta: "Builders Day EthDenver Edition by Polyhedra & Aspecta",
 };
 
 const imageMapping = {
@@ -74,6 +75,7 @@ export default function Attest() {
   const [code, setCode] = useState<string | undefined>(undefined);
   const [badgeArray, setBadgeArray] = useState<Event[] | undefined>();
   const [pointSum, setPointSum] = useState<number>();
+  const [earned, setEarned] = useState<{ value: number; event: string }>();
   const [userLocation, setUserLocation] = useState<Location>({
     latitude: undefined,
     longitude: undefined,
@@ -137,7 +139,7 @@ export default function Attest() {
     }
   };
 
-  const issuePoint = async (value: number, context: string, refId?: string) => {
+  const issuePoint = async (value: number, context: string, event: EventString, refId?: string) => {
     const result = await fetch("/api/issue", {
       method: "POST",
       headers: {
@@ -173,6 +175,7 @@ export default function Attest() {
       return;
     }
     console.log(finalPoint, 'success issuing point');
+    setEarned({ value, event });
     return finalPoint;
   }
 
@@ -485,7 +488,7 @@ export default function Attest() {
   `);
     //if mutation is a success, issue a point
     if (data.data?.createEthDenverAttendance?.document) {
-      const point = await issuePoint(10, "Regular Event Attendance", data.data?.createEthDenverAttendance?.document.id);
+      const point = await issuePoint(10, "Regular Event Attendance", data.data?.createEthDenverAttendance?.document.event, data.data?.createEthDenverAttendance?.document.id);
       console.log(point);
     }
     setAttesting(false);
@@ -568,7 +571,7 @@ export default function Attest() {
       }
     `);
     if (data.data?.createEthDenverAttendance?.document) {
-      const point = await issuePoint(25, "Threshhold Badge Received", data.data?.createEthDenverAttendance?.document.id);
+      const point = await issuePoint(25, "Threshhold Badge Received", data.data?.createEthDenverAttendance?.document.event, data.data?.createEthDenverAttendance?.document.id);
       console.log(point);
     }
     await getPoints();
@@ -589,27 +592,33 @@ export default function Attest() {
   return (
     <div className="flex min-h-screen min-w-full flex-col items-center justify-start gap-6 px-4 py-8 sm:py-16 md:py-24">
       <div
-        className="ring-black-600 w-3/4 rounded-md bg-slate-300 p-6 shadow-xl shadow-rose-600/40 ring-2"
+        className="ring-black-600 w-full rounded-md bg-gray-900 p-6 shadow-xl shadow-rose-600/40"
         style={{ height: "fit-content", minHeight: "35rem" }}
       >
         <form className="mt-4" key={1}>
           {eligible && (
             <>
               <div className="mb-4">
-                <label className="block text-sm font-semibold text-gray-800">
+                <p className="text-center text-2xl text-slate-200">
+                  Congratulations!
+                </p>
+                <p className="text-center text-md text-slate-200">
+                  You found an event disc. Click generate badge below to earn points!
+                </p>
+                <label className="block text-sm font-semibold text-orange-500">
                   Event
                 </label>
-                <p className="h-8 w-full rounded-md border px-3 py-2 focus:border-indigo-600 focus:outline-none">
-                  {event ? event : ""}{" "}
+                <p className="h-8 w-full rounded-md px-3 py-2 focus:border-indigo-600 focus:outline-none text-slate-200">
+                  {event ? badgeNames[event] : ""}{" "}
                 </p>
               </div>
               <div className="mb-4">
-                <label className="block text-sm font-semibold text-gray-800">
+                <label className="block text-sm font-semibold text-orange-500">
                   Coordinates You&apos;ve Shared{" "}
                   <span className="font-light">(optional)</span>
                 </label>
                 {share && (
-                  <p className="mb-3 text-xs font-light text-gray-800">
+                  <p className="mb-3 text-xs font-light text-slate-200">
                     {userLocation.latitude !== undefined &&
                       `${userLocation.latitude}, ${userLocation.longitude}`}
                   </p>
@@ -637,10 +646,10 @@ export default function Attest() {
                 </div>
               </div>
               <div className="mb-4">
-                <label className="block text-sm font-semibold text-gray-800">
+                <label className="block text-sm font-semibold text-orange-500">
                   Current time
                 </label>
-                <p className="text-xs font-light text-gray-800">
+                <p className="text-xs font-light text-slate-200">
                   {time?.toLocaleString()}
                 </p>
               </div>
@@ -648,7 +657,7 @@ export default function Attest() {
               <div className="mt-6 flex justify-center">
                 {!attesting ? (
                   <button
-                    className="w-1/2 transform rounded-md bg-indigo-700 px-4 py-2 text-sm text-white transition-colors duration-200 hover:bg-indigo-600 focus:bg-indigo-600 focus:outline-none"
+                    className="w-1/2 transform rounded-md border-2 border-orange-500 bg-slate-700 text-white p-3 hover:bg-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-600"
                     onClick={(e) => {
                       e.preventDefault();
                       void createClaim();
@@ -672,7 +681,7 @@ export default function Attest() {
         </form>
         {address && !badgeArray && (
           <div className="mt-6 flex flex-col justify-center">
-            <p className="text-center text-2xl text-gray-800">
+            <p className="text-center text-2xl text-slate-200">
               Loading your badges...
             </p>
             <DNA
@@ -680,35 +689,89 @@ export default function Attest() {
               height="80"
               width="80"
               ariaLabel="dna-loading"
-              wrapperStyle={{margin: "auto"}}
+              wrapperStyle={{ margin: "auto" }}
               wrapperClass="dna-wrapper"
             />
           </div>
         )
         }
+        {earned && (
+          <div className="mt-6 flex flex-col justify-center">
+            <p className="text-center text-2xl text-orange-500">
+              Success!
+            </p>
+            <p className="text-center text-md text-slate-200">
+              You have earned {earned.value} points for receiving the {badgeNames[earned.event as EventString]} badge.
+            </p>
+          </div>
+        )
+        }
         {address && badgeArray !== undefined && badgeArray.length > 0 && (
-          <h2 className="mb-8 mt-6 text-center text-3xl font-semibold text-gray-800">
-            Your Badges:
-          </h2>
+          <div className="text-slate-200 text-center mt-6">
+            {eligible && <span>________________________________________</span>}
+            <h2 className="mb-8 mt-6 text-center text-3xl font-semibold text-orange-500">
+              Your Badges and Points:
+            </h2>
+            {!eligible && <button
+              className="w-1/3 transform rounded-md border-2 border-orange-500 bg-slate-700 text-white p-3 hover:bg-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-600"
+              onClick={(e) => {
+                e.preventDefault();
+                window.open(
+                  `/events`,
+                );
+              }
+              }
+            >
+              {"See Events"}
+            </button>}
+          </div>
         )}
         {address && pointSum && (
-          <h3 className="mb-8 mt-6 text-center text-1xl font-semibold text-gray-800">
-            Points Earned: {pointSum}
+          <h3 className="mb-8 mt-6 text-center text-1xl text-slate-200">
+            You have earned a total of <span className="font-semibold text-2xl text-orange-500">{pointSum}</span> points from attending events. Participate in additional events to continue earning points!
           </h3>
         )}
-        {address && badgeArray !== undefined && badgeArray.length === 0 && (
+        {address && badgeArray !== undefined && badgeArray.length === 0 && !eligible && (
           <>
-            <h2 className="mb-8 mt-6 text-center text-3xl font-semibold text-gray-800">
-              No Badges Yet
+            <h2 className="mb-8 mt-6 text-center text-3xl font-semibold text-orange-500">
+              Start Earning Attendance Points!
             </h2>
-            <p className="mb-8 mt-6 text-center text-2xl text-gray-800">
-              Please scan a Disc to begin claiming badges
+            <p className="mb-8 mt-6 text-center text-2xl text-slate-200">
+              You have not earned any points yet! Attend one of the participating events and scan a disc to get started!
             </p>
+            <p className="mb-8 mt-6 text-center text-xl text-slate-200">
+              Where to find us:
+            </p>
+            <p className="mb-8 mt-6 text-center text-md text-slate-200">
+              Fluence Booth: Location TBD
+            </p>
+            <p className="mb-8 mt-6 text-center text-md text-slate-200">
+              Charmverse Booth: Location TBD
+            </p>
+            <p className="mb-8 mt-6 text-center text-md text-slate-200">
+              DePIN Day: Feb 27 @ Green Spaces [<a href="https://depinday.xyz/" target="_blank" className="text-orange-300">More Info</a>]
+            </p>
+            <p className="mb-8 mt-6 text-center text-md text-slate-200">
+              Builders Day EthDenver Edition by Polyhedra & Aspecta: Feb 27 [<a href="https://lu.ma/builderday" target="_blank" className="text-orange-300">More Info</a>]
+            </p>
+            <p className="mb-8 mt-6 text-center text-md text-slate-200">
+              Silk HackerHouse: Feb 27 [<a href="https://twitter.com/silkysignon/status/1750938337282580858?ref_src=twsrc%5Etfw%7Ctwcamp%5Etweetembed%7Ctwterm%5E1750938337282580858%7Ctwgr%5E45dcfe6ca4027dd9df74a2119240c57b588b2c0e%7Ctwcon%5Es1_&ref_url=https%3A%2F%2Fblog.ceramic.network%2Fethdenver-2024-where-to-find-ceramic-in-denver%2F" target="_blank" className="text-orange-300">More Info</a>]
+            </p>
+            <p className="mb-8 mt-6 text-center text-md text-slate-200">
+              SciOS24: Feb 28 @ 2601 Walnut St [<a href="https://scios.desci.community/" target="_blank" className="text-orange-300">More Info</a>]
+            </p>
+            <p className="mb-8 mt-6 text-center text-md text-slate-200">
+              Open Data Day: Feb 28 @ 1261 Delaware St [<a href="https://lu.ma/opendataday1" target="_blank" className="text-orange-300">More Info</a>]
+            </p>
+            <p className="mb-8 mt-6 text-center text-md text-slate-200">
+              Proof-Of-Data Summit: March 1 [<a href="https://lu.ma/proofofdata" target="_blank" className="text-orange-300">More Info</a>]
+            </p>
+
           </>
         )}
         {!address && (
-          <h2 className="mb-8 mt-6 text-center text-3xl font-semibold text-gray-800">
-            Please Connect your Wallet to Begin
+          <h2 className="mb-8 mt-6 text-center text-3xl font-semibold text-orange-500">
+            Please Connect your Wallet to Begin Earning Points
           </h2>
         )}
         <div className="flex-auto flex-row flex-wrap items-center justify-center">
@@ -716,10 +779,10 @@ export default function Attest() {
             badgeArray.map((badge, index) => {
               return (
                 <div
-                  className="mt-4 flex w-auto max-w-full shrink-0 flex-col items-center justify-center rounded-md p-5 shadow-lg"
+                  className="mt-4 flex w-auto max-w-full shrink-0 flex-col items-center justify-center rounded-md p-5 bg-gray-900 shadow-lg shadow-rose-600/40"
                   key={badge.event}
                 >
-                  <p className="m-auto text-center font-semibold text-gray-800">
+                  <p className="m-auto text-center font-semibold text-slate-200">
                     {badgeNames[badge.event as EventString]}
                   </p>
                   <Image

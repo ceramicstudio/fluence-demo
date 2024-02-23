@@ -29,8 +29,13 @@ const Navbar = () => {
                     alt="Ceramic Logo"
                   />
                 </div>
-                <div className="ml-3 text-lg font-bold text-white">
-                  EthDenver24 Scavenger Hunt
+                <div className="flex flex-col">
+                  <div className="ml-3 text-lg font-bold text-white">
+                    EthDenver &apos;24 Scavenger Hunt
+                  </div>
+                  <div className="ml-3 text-sm text-white">
+                    Presented by Ceramic and Fluence
+                  </div>
                 </div>
               </span>
               <div className="ml-0 mt-4 flex w-full flex-row content-start">
@@ -46,6 +51,12 @@ const Navbar = () => {
             className="text-white transition duration-300 hover:text-gray-300"
           >
             Leaderboard
+          </a>
+          <a
+            href="/events"
+            className="text-white transition duration-300 hover:text-gray-300"
+          >
+            Events
           </a>
         </div>
 
@@ -87,6 +98,12 @@ const Navbar = () => {
                   className="text-white transition duration-300 hover:text-gray-300"
                 >
                   Leaderboard
+                </a>
+                <a
+                  href="/events"
+                  className="text-white transition duration-300 hover:text-gray-300"
+                >
+                  Events
                 </a>
               </div>
             </div>

@@ -29,13 +29,13 @@ interface Event {
 const badgeNames = {
   OpenDataDay: "Open Data Day",
   FluenceBooth: "Fluence Booth",
-  DePinDay: "DePin Day",
-  DeSciDay: "DeSci Day",
-  TalentDaoHackerHouse: "TalentDao Hacker House",
+  DePinDay: "DePIN Day",
+  DeSciDay: "SciOS24",
+  TalentDaoHackerHouse: "Silk Hacker House",
   ProofOfData: "Proof of Data",
-  Aspecta: "Aspecta",
-  ThreeBadges: "Three Badges Threshhold",
   AllBadges: "All Badges Threshhold",
+  ThreeBadges: "Three Badges Threshhold",
+  Aspecta: "Builders Day EthDenver Edition by Polyhedra & Aspecta",
 };
 
 const countObject = {
