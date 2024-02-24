@@ -15,16 +15,22 @@ type EventString =
   | "ProofOfData"
   | "Aspecta";
 
-interface Event {
-  recipient: string;
-  latitude?: number;
-  longitude?: number;
-  verified?: boolean;
-  timestamp: string;
-  jwt: string;
-  event: EventString;
+interface Attestation {
   id: string;
-}
+  data: {
+    value: number;
+    refId: string;
+    timestamp: string;
+    context: string;
+  }[];
+  issuer: {
+    id: string;
+  };
+  holder: {
+    id: string;
+  };
+  issuer_verification: string;
+};
 
 const badgeNames = {
   OpenDataDay: "Open Data Day",
@@ -94,11 +100,11 @@ export default function Leader() {
     }
   }
 
-  const checkValid = async (event: Event[]) => {
-    const returnVal: Event[] = [];
+  const checkValid = async (events: Attestation[]) => {
+    const returnVal: Attestation[] = [];
     const did = await getDid();
-    for (const el of event) {
-      const json = Buffer.from(el.jwt, "base64").toString();
+    for (const el of events) {
+      const json = Buffer.from(el.issuer_verification, "base64").toString();
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const parsed = JSON.parse(json) as DagJWS;
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -110,22 +116,12 @@ export default function Leader() {
       const didFromJwt = result?.payload
         ? result.didResolutionResult.didDocument?.id
         : undefined;
-      if (el.latitude === 0 || el.latitude === null) {
-        el.latitude = undefined;
-      }
-      if (el.longitude === 0 || el.longitude === null) {
-        el.longitude = undefined;
-      }
       console.log(didFromJwt, address?.toLowerCase());
       if (
         didFromJwt ===
-        did &&
-        result?.payload &&
-        result.payload.timestamp === el.timestamp &&
-        result.payload.event === el.event &&
-        result.payload.recipient === el.recipient
+        did 
       ) {
-        console.log(result, el.event);
+        console.log(result, el);
         returnVal.push(el);
       }
     }
@@ -133,84 +129,86 @@ export default function Leader() {
   };
 
   const checkParticipants = async () => {
+    const did = await getDid();
     const data = await compose.executeQuery<{
-      ethDenverAttendanceCount: number;
+      pointClaimsCount: number;
     }>(`
         query Count{
-          ethDenverAttendanceCount
+          pointClaimsCount
         }
       `);
     console.log(data);
     const data2 = await compose.executeQuery<{
-      ethDenverAttendanceIndex: {
+      pointClaimsIndex: {
         edges: {
-          node: Event;
+          node: {
+            id: string;
+            data: {
+              value: number;
+              refId: string;
+              timestamp: string;
+              context: string;
+            }[];
+            issuer: {
+              id: string;
+            };
+            holder: {
+              id: string;
+            };
+            issuer_verification: string;
+          };
         }[];
       };
     }>(`
-          query {
-            ethDenverAttendanceIndex(last: ${data.data?.ethDenverAttendanceCount}) {
-              edges {
-                node {
-                  id
-                  recipient
-                  latitude
-                  longitude
+        query CheckPointClaims {
+         pointClaimsIndex(filters: { where: { issuer: { equalTo: "${did}" } } }, first: ${data.data?.pointClaimsCount}) {
+            edges {
+              node {
+                id
+                data {
+                  value
+                  refId
                   timestamp
-                  jwt
-                  event
+                  context
                 }
+                issuer {
+                  id
+                }
+                holder {
+                  id
+                }
+                issuer_verification
               }
             }
           }
-        `);
-    const results = data2.data?.ethDenverAttendanceIndex.edges;
-    //ensure a unique list of [recipient, event] pairs
-    if (results) {
-      const final = await checkValid(results.map((el) => el.node));
-      const unique = Array.from(
-        new Set(
-          final.map((el) => {
-            return JSON.stringify([el.recipient, el.event]);
-          }),
-        ),
-      ).map((el) => {
-        return JSON.parse(el) as [address: string, event: string];
-      });
-      console.log(unique);
-      //count the number of participants who have completed each event based on the unique list
-      const countObj = unique.reduce(
-        (acc, [address, event]) => {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-          acc[event as keyof typeof acc] = acc[event as keyof typeof acc]
-            ? acc[event as keyof typeof acc] + 1
-            : 1;
-          return acc;
-        },
-        {} as typeof countObject,
-      );
-      //multiply each event count by the number of participants who have completed that event by iterating over object
-      for (const [key, value] of Object.entries(countObj)) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-        if(key !== "AllBadges" && key !== "ThreeBadges") {
-          countObj[key as keyof typeof countObj] = value * 10;
-        } else {
-          countObj[key as keyof typeof countObj] = value * 25;
         }
-      }
-      
-      //count the total number of unique participants based on the unique list
-      const participantCount = unique.reduce((acc, [address, event]) => {
-        return acc.add(address);
-      }, new Set<string>()).size;
-      console.log(participantCount);
-      const arr = Object.keys(countObj).map(function (key) {
-        return countObj[key as keyof typeof countObj];
-      });
+        `);
+    console.log(data2);
+    const results = data2.data?.pointClaimsIndex.edges.map((el) => {
+      return el.node;
+    }
+    );
+    console.log(results);
+    if (results) {
+      const final = await checkValid(results);
+      console.log(final);
+
+      //sum the values within the data array for each event based on context
+      final.forEach((el) => {
+        const dataArray = el.data;
+        dataArray.forEach((data) => {
+          const context = data.context as EventString;
+          if (context in countObject) {
+            countObject[context] += data.value;
+          }
+        });
+      } 
+      );
+      console.log(countObject);
+      const arr = Object.values(countObject);
       const maximum = Math.max(...arr);
       setMax(maximum);
-      setParticipantCount(participantCount > 0 ? participantCount : "none");
-      setCount(countObj);
+      setCount(countObject);
     }
   };
 
@@ -259,7 +257,7 @@ export default function Leader() {
                         <div className="flex w-full flex-col items-center justify-start">
                           <div className="flex w-full flex-row items-center justify-start">
                           </div>
-                          <p className="text-center text-gray-800">
+                          <p className="text-center text-slate-200">
                             0 Points Claimed
                           </p>
                         </div>
@@ -269,59 +267,58 @@ export default function Leader() {
                 </>
               );
             })
-          ) : participantCount === "none" ? 
-          (
-            Object.keys(badgeNames).map((badge, index) => {
-              return (
-                <>
-                  <div
-                    className="m-2 mt-4 min-h-48 w-auto max-w-full shrink-0  bg-gray-900 shadow-lg shadow-rose-600/40 p-4"
-                    key={badge}
-                  >
-                    <div className="flex flex-col items-center justify-evenly">
-                      <p className="m-auto text-center font-semibold text-orange-500">
-                        {badgeNames[badge as keyof typeof badgeNames]}
-                      </p>
-                      <Image
-                        src={imageMapping[badge as keyof typeof imageMapping]}
-                        alt={badge}
-                        width={150}
-                        height={150}
-                      />
+          ) : participantCount === "none" ?
+            (
+              Object.keys(badgeNames).map((badge, index) => {
+                return (
+                  <>
+                    <div
+                      className="m-2 mt-4 min-h-48 w-auto max-w-full shrink-0  bg-gray-900 shadow-lg shadow-rose-600/40 p-4"
+                      key={badge}
+                    >
+                      <div className="flex flex-col items-center justify-evenly">
+                        <p className="m-auto text-center font-semibold text-orange-500">
+                          {badgeNames[badge as keyof typeof badgeNames]}
+                        </p>
+                        <Image
+                          src={imageMapping[badge as keyof typeof imageMapping]}
+                          alt={badge}
+                          width={150}
+                          height={150}
+                        />
+                      </div>
+                      {count[badge as keyof typeof countObject] ? (
+                        <div className="mt-7 flex w-full flex-row items-center justify-start">
+                          <div className="flex w-full flex-col items-center justify-start">
+                            <div className="flex w-full flex-row items-center justify-start">
+                            </div>
+                            <p className="text-center text-slate-200">
+                              {count[badge as keyof typeof countObject]} Points Claimed
+                            </p>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="mt-7 flex w-full flex-row items-center justify-start">
+                          <div className="flex w-full flex-col items-center justify-start">
+                            <div className="flex w-full flex-row items-center justify-start">
+                            </div>
+                            <p className="text-center text-slate-200">
+                              0 Points Claimed
+                            </p>
+                          </div>
+                        </div>
+                      )}
                     </div>
-                    {count[badge as keyof typeof countObject] ? (
-                      <div className="mt-7 flex w-full flex-row items-center justify-start">
-                        <div className="flex w-full flex-col items-center justify-start">
-                          <div className="flex w-full flex-row items-center justify-start">
-                          </div>
-                          <p className="text-center text-slate-200">
-                            {count[badge as keyof typeof countObject]} Points Claimed
-                          </p>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="mt-7 flex w-full flex-row items-center justify-start">
-                        <div className="flex w-full flex-col items-center justify-start">
-                          <div className="flex w-full flex-row items-center justify-start">
-                          </div>
-                          <p className="text-center text-slate-200">
-                           0 Points Claimed
-                          </p>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </>
-              );
-            })
-          ) :
-          
-          (
-            <div className="m-auto flex w-full flex-col items-center justify-center">
-              <DNA height={100} width={100} />
-              <p className="text-center text-slate-200">Loading Event Data...</p>
-            </div>
-          )}
+                  </>
+                );
+              })
+            ) :
+            (
+              <div className="m-auto flex w-full flex-col items-center justify-center">
+                <DNA height={100} width={100} />
+                <p className="text-center text-slate-200">Loading Event Data...</p>
+              </div>
+            )}
         </div>
       </div>
     </div>

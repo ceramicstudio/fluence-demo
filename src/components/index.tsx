@@ -40,7 +40,10 @@ interface Event {
   jwt: string;
   event: EventString;
   id: string;
-}
+  issuer: {
+    id: string;
+  };
+  }
 
 const badgeNames = {
   OpenDataDay: "Open Data Day",
@@ -51,7 +54,7 @@ const badgeNames = {
   ProofOfData: "Proof of Data",
   AllBadges: "All Badges Threshhold",
   ThreeBadges: "Three Badges Threshhold",
-  Aspecta: "Builders Day EthDenver Edition by Polyhedra & Aspecta",
+  Aspecta: "Builders Day EthDenver Edition",
 };
 
 const imageMapping = {
@@ -140,6 +143,7 @@ export default function Attest() {
   };
 
   const issuePoint = async (value: number, context: string, event: EventString, refId?: string) => {
+    const did = await getDid();
     const result = await fetch("/api/issue", {
       method: "POST",
       headers: {
@@ -155,31 +159,114 @@ export default function Attest() {
     });
     type returnType = {
       err?: unknown;
-      id: string;
-      issuer: {
-        id: string;
-      };
-      recipient: {
-        id: string;
-      };
-      data: {
-        value: number;
-        timestamp: string;
-        context: string;
-        refId: string;
-      }[];
+      completePoint: {
+        dataToAppend: {
+          value: number;
+          timestamp: string;
+          context: string;
+          refId: string;
+        }[];
+        issuer_verification: string;
+        streamId: string;
+      }
+
     };
     const finalPoint = (await result.json()) as returnType;
+    console.log(finalPoint);
     if (finalPoint.err) {
       alert(finalPoint.err);
       return;
     }
-    console.log(finalPoint, 'success issuing point');
+    console.log('Creating new point attestation')
+    let data;
+    if (finalPoint.completePoint.dataToAppend.length === 1) {
+      data = await compose.executeQuery(`
+      mutation  {
+        createPointClaims(input: {
+          content: {
+            issuer: "${did}"
+            data: ${JSON.stringify(finalPoint.completePoint.dataToAppend).replace(/"([^"]+)":/g, '$1:')}
+            issuer_verification: "${finalPoint.completePoint.issuer_verification}"
+          }
+        })
+        {
+          document {
+            id
+            holder {
+              id
+            }
+            issuer {
+              id
+            }
+            issuer_verification
+            data {
+              value
+              refId
+              timestamp
+              context
+            }
+          }
+        }
+      }
+      `);
+    } else {
+      data = await compose.executeQuery<{
+        updatePointClaims: {
+          pointClaims: {
+            id: string;
+            holder: {
+              id: string;
+            };
+            issuer: {
+              id: string;
+            };
+            data: {
+              value: number;
+              refId: string;
+              timestamp: string;
+              context: string;
+            }[];
+            issuer_verification: string;
+          };
+        };
+      }>(`
+      mutation {
+        updatePointClaims(
+          input: {
+            id: "${finalPoint.completePoint.streamId}",
+            content: {
+                data: ${JSON.stringify(finalPoint.completePoint.dataToAppend).replace(/"([^"]+)":/g, '$1:')}
+                issuer_verification: "${finalPoint.completePoint.issuer_verification}"
+            }
+          }
+        ) {
+          pointClaims: document {
+            id
+            holder {
+              id
+            }
+            issuer {
+              id
+            }
+            data {
+                value
+                refId
+                timestamp
+                context
+             }
+            issuer_verification
+          }
+        }
+      }
+    `);
+    }
+    console.log(data, 'success issuing point');
     setEarned({ value, event });
     return finalPoint;
   }
 
   const createEligibility = async (e: string) => {
+    const did = await getDid();
     const data = await compose.executeQuery<{
       node: {
         ethDenverAttendanceList: {
@@ -192,7 +279,15 @@ export default function Attest() {
         query {
           node(id: "${`did:pkh:eip155:${chainId}:${address?.toLowerCase()}`}") {
           ... on CeramicAccount {
-             ethDenverAttendanceList(filters: { where: { event: { equalTo: "${e}" } } }, first: 1) {
+             ethDenverAttendanceList(
+              filters: {
+                and: [
+                  { where: { event: { equalTo: "${e}" } } }
+                  { and: { where: { issuer: { equalTo: "${did}" } } } }
+                ]
+              }
+             
+             first: 1) {
               edges {
                 node {
                   id
@@ -209,6 +304,7 @@ export default function Attest() {
           }
         }
       `);
+      console.log(data);
     if (
       data.data &&
       data.data.node.ethDenverAttendanceList.edges.length === 0
@@ -242,61 +338,79 @@ export default function Attest() {
       const did = await getDid();
       const exists = await compose.executeQuery<{
         node: {
-          pointAttestationsList: {
+          pointClaimsList: {
             edges: {
               node: {
                 id: string;
-                issuer: {
-                  id: string;
-                };
-                recipient: {
-                  id: string;
-                };
                 data: {
                   value: number;
                   refId: string;
                   timestamp: string;
                   context: string;
                 }[];
+                issuer: {
+                  id: string;
+                };
+                holder: {
+                  id: string;
+                };
+                issuer_verification: string;
               };
             }[];
           };
-        };
-      } | null>(`
-      query CheckPointAttestations {
-        node(id: "${did}") {
-          ... on CeramicAccount {
-                pointAttestationsList(filters: { where: { recipient: { equalTo: "${`did:pkh:eip155:${chainId}:${address}`}" } } }, first: 1) {
-                  edges {
-                    node {
-                        id
-                        data {
-                          value
-                          refId
-                          timestamp
-                          context
-                        }
-                        issuer {
+        } | null;
+      }>(`
+          query CheckPointClaims {
+            node(id: "${`did:pkh:eip155:${chainId}:${address?.toLowerCase()}`}") {
+              ... on CeramicAccount {
+                    pointClaimsList(filters: { where: { issuer: { equalTo: "${did}" } } }, first: 1) {
+                      edges {
+                        node {
                             id
-                        }
-                        recipient {
-                            id
-                        }
-                     }
+                            data {
+                              value
+                              refId
+                              timestamp
+                              context
+                            }
+                            issuer {
+                                id
+                            }
+                            holder {
+                                id
+                            }
+                            issuer_verification
+                         }
+                      }
+                    }
                   }
                 }
               }
-            }
-          }
-      `);
-
+          `);
       console.log(exists, 'point attestation');
-      if (exists.data?.node.pointAttestationsList.edges.length) {
-        const data = exists.data?.node.pointAttestationsList.edges[0]?.node.data ?? undefined;
-        const sumValues = data?.reduce((acc, curr) => acc + curr.value, 0);
-        setPointSum(sumValues ?? 0);
+      if (exists?.data?.node?.pointClaimsList?.edges.length) {
+        const dataToVerify = exists?.data?.node?.pointClaimsList?.edges[0]?.node?.issuer_verification;
+        const json = Buffer.from(dataToVerify!, "base64").toString();
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        const parsed = JSON.parse(json) as DagJWS;
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        const newDid = new DID({ resolver: KeyResolver.getResolver() });
+        const result = parsed.payload
+          ? await newDid.verifyJWS(parsed)
+          : undefined;
+        const didFromJwt = result?.payload
+          ? result?.didResolutionResult.didDocument?.id
+          : undefined;
+        if (didFromJwt === did) {
+          const data = result?.payload;
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
+          const sumValues = data?.reduce((acc: number, curr: { value: number }) => acc + curr.value, 0);
+          setPointSum(sumValues as number | undefined);
+        }
       }
-    } catch (e) {
+    }
+    catch (e) {
       console.log(e);
     }
   }
@@ -421,6 +535,7 @@ export default function Attest() {
   };
 
   const createBadge = async () => {
+    const did = await getDid();
     if (!code) {
       alert("No unique code provided");
       return;
@@ -466,6 +581,7 @@ export default function Attest() {
       createEthDenverAttendance(input: {
         content: {
           recipient: "${finalClaim.recipient}"
+          issuer: "${did}"
           latitude: ${finalClaim.latitude ?? 0}
           longitude: ${finalClaim.longitude ?? 0}
           timestamp: "${finalClaim.timestamp}"
@@ -476,6 +592,9 @@ export default function Attest() {
       {
         document{
           id
+          issuer {
+            id
+          }
           recipient
           latitude
           longitude
@@ -488,7 +607,7 @@ export default function Attest() {
   `);
     //if mutation is a success, issue a point
     if (data.data?.createEthDenverAttendance?.document) {
-      const point = await issuePoint(10, "Regular Event Attendance", data.data?.createEthDenverAttendance?.document.event, data.data?.createEthDenverAttendance?.document.id);
+      const point = await issuePoint(10, data.data?.createEthDenverAttendance?.document.event, data.data?.createEthDenverAttendance?.document.event, data.data?.createEthDenverAttendance?.document.id);
       console.log(point);
     }
     setAttesting(false);
@@ -502,6 +621,7 @@ export default function Attest() {
     size: number,
   ): Promise<Event | undefined> => {
     setAttesting(true);
+    const did = await getDid();
     const result = await fetch("/api/final", {
       method: "POST",
       headers: {
@@ -554,6 +674,7 @@ export default function Attest() {
         createEthDenverAttendance(input: {
           content: {
             recipient: "${finalClaim.recipient}"
+            issuer: "${did}"
             timestamp: "${finalClaim.timestamp}"
             jwt: "${finalClaim.jwt}"
             event: "${whichEvent}"
@@ -562,6 +683,9 @@ export default function Attest() {
         {
           document{
             id
+            issuer {
+              id
+            }
             recipient
             timestamp
             jwt
@@ -571,7 +695,7 @@ export default function Attest() {
       }
     `);
     if (data.data?.createEthDenverAttendance?.document) {
-      const point = await issuePoint(25, "Threshhold Badge Received", data.data?.createEthDenverAttendance?.document.event, data.data?.createEthDenverAttendance?.document.id);
+      const point = await issuePoint(25, data.data?.createEthDenverAttendance?.document.event, data.data?.createEthDenverAttendance?.document.event, data.data?.createEthDenverAttendance?.document.id);
       console.log(point);
     }
     await getPoints();
@@ -655,7 +779,7 @@ export default function Attest() {
               </div>
 
               <div className="mt-6 flex justify-center">
-                {!attesting ? (
+                {!attesting && address ? (
                   <button
                     className="w-1/2 transform rounded-md border-2 border-orange-500 bg-slate-700 text-white p-3 hover:bg-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-600"
                     onClick={(e) => {
@@ -665,7 +789,7 @@ export default function Attest() {
                   >
                     {"Generate Badge"}
                   </button>
-                ) : (
+                ) : address ? (
                   <DNA
                     visible={true}
                     height="80"
@@ -674,7 +798,7 @@ export default function Attest() {
                     wrapperStyle={{}}
                     wrapperClass="dna-wrapper"
                   />
-                )}
+                ) : null}
               </div>
             </>
           )}

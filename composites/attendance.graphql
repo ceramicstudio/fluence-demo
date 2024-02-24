@@ -7,8 +7,10 @@ type EthDenverAttendance
   @createIndex(fields: [{ path: ["event"] }])
   @createIndex(fields: [{ path: ["latitude"] }])
   @createIndex(fields: [{ path: ["longitude"] }])
-  @createIndex(fields: [{ path: ["timestamp"] }]) {
+  @createIndex(fields: [{ path: ["timestamp"] }])
+  @createIndex(fields: [{ path: ["issuer"] }]) {
   controller: DID! @documentAccount
+  issuer: DID! @accountReference
   recipient: String! @string(minLength: 42, maxLength: 42)
   event: String! @string(maxLength: 100)
   latitude: Float
