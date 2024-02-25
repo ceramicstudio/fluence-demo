@@ -13,7 +13,8 @@ type EventString =
   | "DeSciDay"
   | "TalentDaoHackerHouse"
   | "ProofOfData"
-  | "Aspecta";
+  | "Aspecta"
+  | "CharmVerse";
 
 interface Attestation {
   id: string;
@@ -42,6 +43,7 @@ const badgeNames = {
   AllBadges: "All Badges Threshhold",
   ThreeBadges: "Three Badges Threshhold",
   Aspecta: "Builders Day (Aspecta)",
+  CharmVerse: "CharmVerse Booth",
 };
 
 const countObject = {
@@ -52,6 +54,7 @@ const countObject = {
   TalentDaoHackerHouse: 0,
   ProofOfData: 0,
   Aspecta: 0,
+  CharmVerse: 0,
   ThreeBadges: 0,
   AllBadges: 0,
 };
@@ -66,6 +69,7 @@ const imageMapping = {
   Aspecta: "/aspecta.png",
   AllBadges: "/all.png",
   ThreeBadges: "/final.png",
+  CharmVerse: "/charmverse.png",
 };
 
 export default function Leader() {

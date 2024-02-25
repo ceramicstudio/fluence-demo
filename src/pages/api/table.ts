@@ -54,27 +54,28 @@
 //     await client.query(createTableString);
 //     // await client.query(createEmailString);
 //     const set = new Set();
-//     while (set.size < 7000) {
-//       const code = crypto.randomBytes(3).toString("hex");
+//     while (set.size < 16000) {
+//       const code = crypto.randomBytes(6).toString("hex");
 //       set.add(code);
 //     }
 //     const arr = Array.from(set);
 //     let i = 0;
 //     for (const code of arr) {
 //       let e;
-//       i < 1000
+//       i < 2000
 //         ? (e = "FluenceBooth")
-//         : i < 2000
+//         : i < 4000
 //           ? (e = "ProofOfData")
-//           : i < 3000
+//           : i < 6000
 //             ? (e = "DePinDay")
-//             : i < 4000
+//             : i < 8000
 //               ? (e = "DeSciDay")
-//               : i < 5000
+//               : i < 10000
 //                 ? (e = "OpenDataDay")
-//                 : i < 6000
+//                 : i < 12000
 //                   ? (e = "TalentDaoHackerHouse")
-//                   : (e = "Aspecta");
+//                   : i < 14000
+//                   ? (e = "Aspecta") : (e = "CharmVerse");
 //       // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
 //       const newItemString = `INSERT INTO is_used (code, used, event) VALUES ('${code}', false, '${e}')`;
 //       await client.query(newItemString);

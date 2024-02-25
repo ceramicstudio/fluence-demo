@@ -20,6 +20,7 @@ type ObjectType = {
   TalentDaoHackerHouse: string;
   ProofOfData: string;
   Aspecta: string;
+  CharmVerse: string;
 };
 
 type EventString =
@@ -29,7 +30,8 @@ type EventString =
   | "DeSciDay"
   | "TalentDaoHackerHouse"
   | "ProofOfData"
-  | "Aspecta";
+  | "Aspecta"
+  | "CharmVerse";
 
 interface Event {
   recipient: string;
@@ -55,6 +57,7 @@ const badgeNames = {
   AllBadges: "All Badges Threshhold",
   ThreeBadges: "Three Badges Threshhold",
   Aspecta: "Builders Day EthDenver Edition",
+  CharmVerse: "CharmVerse Booth",
 };
 
 const imageMapping = {
@@ -67,6 +70,7 @@ const imageMapping = {
   AllBadges: "/all.png",
   ThreeBadges: "/final.png",
   Aspecta: "/aspecta.png",
+  CharmVerse: "/charmverse.png",
 };
 
 export default function Attest() {
@@ -457,6 +461,7 @@ export default function Attest() {
       TalentDaoHackerHouse: "",
       ProofOfData: "",
       Aspecta: "",
+      CharmVerse: "",
     };
     if (
       data.data &&
@@ -510,7 +515,9 @@ export default function Attest() {
                         ? (sharedObj.ProofOfData = event.id)
                         : event.event === "Aspecta"
                           ? (sharedObj.Aspecta = event.id)
-                          : null;
+                          : event.event === "CharmVerse"
+                            ? (sharedObj.CharmVerse = event.id)
+                            : null;
           }
         } catch (e) {
           console.log(e);
@@ -638,6 +645,7 @@ export default function Attest() {
           : "",
         ProofOfData: sharedObj.ProofOfData ? sharedObj.ProofOfData : "",
         Aspecta: sharedObj.Aspecta ? sharedObj.Aspecta : "",
+        CharmVerse: sharedObj.CharmVerse ? sharedObj.CharmVerse : "",
         event: size === 8 ? "AllBadges" : "ThreeBadges",
       }),
     });
@@ -652,6 +660,7 @@ export default function Attest() {
       TalentDaoHackerHouse: string;
       ProofOfData: string;
       Aspecta: string;
+      CharmVerse: string;
       timestamp: string;
       event: string;
     };
