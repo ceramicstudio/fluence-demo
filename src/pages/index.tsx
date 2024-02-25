@@ -55,7 +55,7 @@ export default function Home() {
               <h2 className="mb-8 mt-6 text-center text-4xl text-orange-500 margin-auto">
                 Welcome to the EthDenver &apos;24 Scavenger Hunt
               </h2>
-              <img src="/og.png" alt="wallet" className="w-full mx-auto" />
+              <img src="/all.png" alt="wallet" className="w-2/3 mx-auto" />
               <h3 className="mb-8 mt-6 text-center text-1xl text-slate-200 margin-auto font-semibold">
                 Please Connect your Wallet to Begin Earning Points
               </h3>

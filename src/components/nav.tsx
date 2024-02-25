@@ -20,7 +20,7 @@ const Navbar = () => {
             className="text-white transition duration-300 hover:text-gray-300"
           >
             <div className="flex flex-col items-center">
-              <span className="flex flex-row">
+              <div className="flex flex-row mb-2">
                 <div className="aspect-square">
                   <Image
                     src="https://developers.ceramic.network/img/logo.svg"
@@ -37,7 +37,7 @@ const Navbar = () => {
                     Presented by Ceramic and Fluence
                   </div>
                 </div>
-              </span>
+              </div>
               <div className="ml-0 mt-4 flex w-full flex-row content-start">
                 <w3m-button size="sm" balance="hide" />
               </div>
