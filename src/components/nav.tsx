@@ -38,7 +38,7 @@ const Navbar = () => {
                   </div>
                 </div>
               </div>
-              <div className="ml-0 mt-4 flex w-full flex-row content-start">
+              <div className="ml-0 mt-7 flex w-full flex-row content-start">
                 <w3m-button size="sm" balance="hide" />
               </div>
             </div>
