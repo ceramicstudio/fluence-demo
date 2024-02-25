@@ -5,7 +5,6 @@ import { useComposeDB } from "@/fragments";
 import { DNA } from "react-loader-spinner";
 import { DID, type DagJWS } from "dids";
 import KeyResolver from "key-did-resolver";
-import { set } from "zod";
 
 type Location = {
   latitude: number | undefined;
@@ -45,7 +44,7 @@ interface Event {
   issuer: {
     id: string;
   };
-  }
+}
 
 const badgeNames = {
   OpenDataDay: "Open Data Day",
@@ -82,6 +81,7 @@ export default function Attest() {
   const [code, setCode] = useState<string | undefined>(undefined);
   const [badgeArray, setBadgeArray] = useState<Event[] | undefined>();
   const [pointSum, setPointSum] = useState<number>();
+  const [authed, setAuthed] = useState(false);
   const [earned, setEarned] = useState<{ value: number; event: string }>();
   const [userLocation, setUserLocation] = useState<Location>({
     latitude: undefined,
@@ -120,6 +120,25 @@ export default function Attest() {
       setInterval(() => {
         setTime(new Date());
       }, 1000);
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
+  const pollForSign = () => {
+    try {
+      const interval = setInterval(() => {
+        if (compose.did !== undefined) {
+          // console.log('DID is ready')
+          // console.log(compose)
+          setAuthed(true);
+        } else {
+          // console.log('DID is not ready')
+        }
+      }, 1000);
+      if (authed) {
+        clearInterval(interval);
+      }
     } catch (e) {
       console.log(e);
     }
@@ -308,7 +327,7 @@ export default function Attest() {
           }
         }
       `);
-      console.log(data);
+    console.log(data);
     if (
       data.data &&
       data.data.node.ethDenverAttendanceList.edges.length === 0
@@ -720,6 +739,7 @@ export default function Attest() {
   useEffect(() => {
     void findEvent();
     void updateTime();
+    void pollForSign();
   }, [address, chainId]);
 
   return (
@@ -729,7 +749,7 @@ export default function Attest() {
         style={{ height: "fit-content", minHeight: "35rem" }}
       >
         <form className="mt-4" key={1}>
-          {eligible && (
+          {eligible && authed && address && (
             <>
               <div className="mb-4">
                 <p className="text-center text-2xl text-slate-200">
@@ -747,15 +767,15 @@ export default function Attest() {
               </div>
               <div className="mb-4">
                 <label className="block text-sm font-semibold text-orange-500">
-                  Coordinates You&apos;ve Shared{" "}
+                  Share Location {" "}
                   <span className="font-light">(optional)</span>
                 </label>
-                {share && (
+                {/* {share && (
                   <p className="mb-3 text-xs font-light text-slate-200">
                     {userLocation.latitude !== undefined &&
                       `${userLocation.latitude}, ${userLocation.longitude}`}
                   </p>
-                )}
+                )} */}
                 <div className="flex items-center">
                   <input
                     id="link-checkbox"
@@ -778,15 +798,14 @@ export default function Attest() {
                   )}
                 </div>
               </div>
-              <div className="mb-4">
+              {/* <div className="mb-4">
                 <label className="block text-sm font-semibold text-orange-500">
                   Current time
                 </label>
                 <p className="text-xs font-light text-slate-200">
                   {time?.toLocaleString()}
                 </p>
-              </div>
-
+              </div> */}
               <div className="mt-6 flex justify-center">
                 {!attesting && address ? (
                   <button
@@ -811,6 +830,17 @@ export default function Attest() {
               </div>
             </>
           )}
+          {eligible && !authed && address && (
+            <div className="mt-6 flex flex-col justify-center">
+              <p className="text-center text-2xl text-slate-200">
+                You have connected your wallet but have not authenticated yourself with the Ceramic network.
+              </p>
+              <p className="text-center text-1xl text-slate-200 mt-5">
+                Please return to your browser wallet and sign the Ceramic network request to continue. The authentication message should start with:
+              </p>
+              <p className="text-orange-500 mt-5 text-center text-1xl italic">&quot;Give this application access to some of your data on Ceramic&quot;</p>
+            </div>
+          )}
         </form>
         {address && !badgeArray && (
           <div className="mt-6 flex flex-col justify-center">
@@ -833,9 +863,21 @@ export default function Attest() {
             <p className="text-center text-2xl text-orange-500">
               Success!
             </p>
-            <p className="text-center text-md text-slate-200">
-              You have earned {earned.value} points for receiving the {badgeNames[earned.event as EventString]} badge.
-            </p>
+            {earned.event === "ThreeBadges" && (
+              <p className="text-center text-md text-slate-200">
+                Because you checked in to 3 events, you have received a bonus 4th badge!  That means you&apos;ve earned 30 points from event check-ins and 25 points from the bonus badge - for a total of 55 points!
+              </p>
+            )}
+            {earned.event === "AllBadges" && (
+              <p className="text-center text-md text-slate-200">
+                Because you checked in to all the events, you have received a bonus final badge!  That means you&apos;ve earned an additional 25 points on top of the 10 points you received for attending each event.
+              </p>
+            )}
+            {earned.event !== "AllBadges" && earned.event !== "ThreeBadges" && (
+              <p className="text-center text-md text-slate-200">
+                You have earned {earned.value} points for receiving the {badgeNames[earned.event as EventString]} badge.
+              </p>
+            )}
           </div>
         )
         }

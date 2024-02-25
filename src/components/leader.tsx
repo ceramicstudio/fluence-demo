@@ -198,17 +198,24 @@ export default function Leader() {
       console.log(final);
 
       //sum the values within the data array for each event based on context
+      let i = 0;
       final.forEach((el) => {
         const dataArray = el.data;
         dataArray.forEach((data) => {
+          i++;
           const context = data.context as EventString;
           if (context in countObject) {
-            countObject[context] += data.value;
+            if(countObject[context] === 0) {
+              countObject[context] = data.value;
+              console.log(countObject[context]);
+            } else {
+              countObject[context] += data.value;
+            }
           }
         });
       } 
       );
-      console.log(countObject);
+      console.log(countObject, i);
       const arr = Object.values(countObject);
       const maximum = Math.max(...arr);
       setMax(maximum);
@@ -230,10 +237,9 @@ export default function Leader() {
           {max > 0 ? (
             Object.keys(badgeNames).map((badge, index) => {
               return (
-                <>
+                <div key={badge}>
                   <div
                     className="m-2 mt-4 min-h-48 w-auto max-w-full shrink-0  bg-gray-900 shadow-lg shadow-rose-600/40 p-4"
-                    key={badge}
                   >
                     <div className="flex flex-col items-center justify-evenly">
                       <p className="m-auto text-center font-semibold text-orange-500">
@@ -268,7 +274,7 @@ export default function Leader() {
                       </div>
                     )}
                   </div>
-                </>
+                </div>
               );
             })
           ) : participantCount === "none" ?
