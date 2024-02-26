@@ -31,7 +31,12 @@ const Navbar = () => {
                 </div>
                 <div className="flex flex-col">
                   <div className="ml-3 text-lg font-bold text-white">
-                    EthDenver &apos;24 Scavenger Hunt
+                    <a
+                      href="/leaderboard"
+                      className="text-lg font-bold text-white"
+                    >
+                      EthDenver &apos;24 Scavenger Hunt
+                    </a>
                   </div>
                   <div className="ml-3 text-sm text-white">
                     Presented by Ceramic and Fluence
@@ -57,6 +62,12 @@ const Navbar = () => {
             className="text-white transition duration-300 hover:text-gray-300"
           >
             Events
+          </a>
+          <a
+            href="/how-it-works"
+            className="text-white transition duration-300 hover:text-gray-300"
+          >
+            How it Works
           </a>
         </div>
 
@@ -104,6 +115,12 @@ const Navbar = () => {
                   className="text-white transition duration-300 hover:text-gray-300"
                 >
                   Events
+                </a>
+                <a
+                  href="/how-it-works"
+                  className="text-white transition duration-300 hover:text-gray-300"
+                >
+                  How it Works
                 </a>
               </div>
             </div>

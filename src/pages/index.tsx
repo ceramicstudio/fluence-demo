@@ -4,6 +4,7 @@ import Navbar from "@/components/nav";
 import { useAccount } from "wagmi";
 import Attest from "@/components";
 import Modal from "@/components/modal";
+import Link from "next/link";
 
 export default function Home() {
   const { address } = useAccount();
@@ -49,16 +50,19 @@ export default function Home() {
         {!loggedIn && (
           <div className="flex min-h-screen min-w-full flex-col items-center justify-start gap-6 px-4 py-8 sm:py-16 md:py-24">
             <div
-              className="ring-black-600 w-full rounded-md bg-gray-900 p-6 shadow-xl shadow-rose-600/40"
+              className="ring-black-600 w-full rounded-md bg-gray-900 p-6 shadow-xl shadow-rose-600/40 items-center flex flex-col"
               style={{ height: "fit-content", minHeight: "35rem" }}
             >
               <h2 className="mb-8 mt-6 text-center text-4xl text-orange-500 margin-auto">
                 Welcome to the EthDenver &apos;24 Scavenger Hunt
               </h2>
-              <img src="/all.png" alt="wallet" className="w-2/3 mx-auto" />
+              <img src="/all.png" alt="wallet" className="w-1/3 mx-auto" />
               <h3 className="mb-8 mt-6 text-center text-1xl text-slate-200 margin-auto font-semibold">
                 Please Connect your Wallet to Begin Earning Points
               </h3>
+              <button className="bg-transparent hover:bg-orange-500 text-orange-300 font-semibold hover:text-white py-2 px-4 border border-orange-500 hover:border-transparent rounded" onClick={() => window.location.href = "/how-it-works"}>
+                How it Works
+              </button>
             </div>
           </div>
         )
