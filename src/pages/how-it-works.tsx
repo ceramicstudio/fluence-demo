@@ -33,8 +33,8 @@ export default function Home() {
         <link rel='icon' href='/ceramic-favicon.svg' />
         <meta property="og:image" content="/og.png" />
         <meta property="og:type" content="website" />
-        <meta property="og:title" content="Events | EthDenver '24 Scavenger Hunt" />
-        <meta property="og:description" content="Discover where to find us at EthDenver '24." />
+        <meta property="og:title" content="How it Works | EthDenver '24 Scavenger Hunt" />
+        <meta property="og:description" content="Learn how the EthDenver '24 Scavenger Hunt works!" />
         <meta name="twitter:image" content="/og.png" />
       </Head>
       <Navbar />
