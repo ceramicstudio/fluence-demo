@@ -13,7 +13,7 @@ export default function Events() {
           </p>
           <p className="mb-8 mt-6 text-center text-md text-slate-200 px-8">
             A fun and interactive way to engage with the EthDenver community and earn points for collecting event attendance badges.
-            The best part - your user data (including the badges and points you earn) is stored on Ceramic, the open and decentralized data network, so you own your data and can take it with you wherever you go.
+            The best part - instead of being stored on a centralized private server, points data is stored on Ceramic, the open and decentralized data network, which means you have control of your data and can take it with you wherever you go.
           </p>
           <p className="mb-8 mt-6 text-center text-2xl text-orange-500">
             How it Works
