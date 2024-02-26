@@ -32,7 +32,7 @@ export default function Home() {
       <Head>
         <title>EthDenver &apos;24 Scavenger Hunt</title>
         <meta name="description" content="Join the EthDenver &apos;24 Scavenger Hunt, presented by Ceramic and Fluence." />
-        <link rel="icon" type="image/jpg" href="/favicon.ico" />
+        <link rel='icon' href='/ceramic-favicon.svg' />
         <meta property="og:image" content="/og.png" />
         <meta property="og:type" content="website" />
         <meta property="og:title" content="EthDenver '24 Scavenger Hunt" />
