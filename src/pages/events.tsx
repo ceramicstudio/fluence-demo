@@ -30,7 +30,7 @@ export default function Home() {
       <Head>
         <title>Events | EthDenver &apos;24 Scavenger Hunt</title>
         <meta name="description" content="Discover where to find us at EthDenver &apos;24" />
-        <link rel="icon" href="/favicon.ico" />
+        <link rel="icon" type="image/jpg" href="/favicon.ico" />
         <meta property="og:image" content="/og.png" />
         <meta property="og:type" content="website" />
         <meta property="og:title" content="Events | EthDenver '24 Scavenger Hunt" />
