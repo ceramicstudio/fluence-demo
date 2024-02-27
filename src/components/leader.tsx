@@ -216,6 +216,11 @@ export default function Leader() {
       } 
       );
       console.log(countObject, i);
+      if (i === 0) {
+        setParticipantCount("none");
+      } else {
+        setParticipantCount(i);
+      }
       const arr = Object.values(countObject);
       const maximum = Math.max(...arr);
       setMax(maximum);
