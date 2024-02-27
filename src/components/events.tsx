@@ -15,7 +15,7 @@ export default function Events() {
             Fluence Booth: Location TBD
           </p>
           <p className="mb-8 mt-6 text-center text-md text-slate-200">
-            Charmverse Booth: Location TBD
+            Charmverse Booth: National Western Complex, Booth 113
           </p>
           <p className="mb-8 mt-6 text-center text-md text-slate-200">
             DePIN Day: Feb 27 @ Green Spaces [<a href="https://depinday.xyz/" target="_blank" className="text-orange-300">More Info</a>]
