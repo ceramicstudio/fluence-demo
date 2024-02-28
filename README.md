@@ -28,8 +28,6 @@ Take the logged string output from your and assign it to the `SECRET_KEY` value 
 npm run dev
 ```
 
-6. Prime your PostgreSQL database by making a fetch request to `http://localhost:3000/api/table`
+6. Uncomment the code found in /src/pages/api/table.ts and prime your PostgreSQL database by making a fetch request to `http://localhost:3000/api/table`
 
-7. Replace the checks for `did:key:...` in `/src/components/index.tsx` with check against the public did:key associated with your `SECRET_KEY` environment variable
-
-8. Once complete, you are ready to use the application
+7. Once complete, you are ready to use the application

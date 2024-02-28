@@ -52,7 +52,7 @@
 //     email text UNIQUE)
 // `;
 //     await client.query(createTableString);
-//     // await client.query(createEmailString);
+//     await client.query(createEmailString);
 //     const set = new Set();
 //     while (set.size < 16000) {
 //       const code = crypto.randomBytes(6).toString("hex");
