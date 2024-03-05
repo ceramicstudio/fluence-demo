@@ -42,6 +42,7 @@
 //     id SERIAL PRIMARY KEY,
 //     code text UNIQUE,
 //     used boolean,
+//     delivered boolean,
 //     event text)
 // `;
 

@@ -57,8 +57,6 @@ export default async function createPoint(
   try {
     if (SECRET_KEY) {
       const did = await authenticateDID(SECRET_KEY);
-      composeClient.setDID(did);
-      console.log(did.id)
       const exists = await composeClient.executeQuery<{
         node: {
           pointClaimsList: {
